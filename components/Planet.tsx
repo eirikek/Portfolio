@@ -8,7 +8,6 @@ import type { PortfolioBody, BodyKind } from "@/lib/portfolioData";
 import { bodyLocalPosition, focusAngleFor } from "@/lib/orbits";
 import { useRig } from "@/lib/rig";
 
-/** Fresnel atmosphere shell shader. */
 const atmoVertex = /* glsl */ `
   varying vec3 vNormal;
   void main() {
@@ -27,6 +26,101 @@ const atmoFragment = /* glsl */ `
   }
 `;
 
+const surfaceVertex = /* glsl */ `
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vPosition = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const surfaceFragment = /* glsl */ `
+  uniform vec3 uBase;
+  uniform vec3 uDetail;
+  uniform float uSeed;
+  uniform float uBands;
+  uniform float uSpots;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+
+  float hash(vec3 p) {
+    p = fract(p * 0.3183099 + vec3(0.11, 0.17, 0.13));
+    p *= 17.0;
+    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+  }
+
+  float noise(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(mix(hash(i), hash(i + vec3(1,0,0)), f.x),
+          mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+      mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+          mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y),
+      f.z
+    );
+  }
+
+  float fbm(vec3 p) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    for (int i = 0; i < 5; i++) {
+      value += noise(p) * amplitude;
+      p = p * 2.03 + 7.1;
+      amplitude *= 0.5;
+    }
+    return value;
+  }
+
+  void main() {
+    vec3 p = normalize(vPosition);
+    float terrain = fbm(p * 5.0 + uSeed);
+    float fine = fbm(p * 17.0 - uSeed);
+    float bands = sin((p.y + terrain * 0.12) * 34.0 + uSeed) * 0.5 + 0.5;
+    float mask = mix(terrain, bands, uBands);
+    float crater = smoothstep(0.79, 0.83, fine) * uSpots;
+    vec3 color = mix(uBase * 0.62, uDetail, smoothstep(0.3, 0.78, mask));
+    color *= 1.0 - crater * 0.42;
+
+    vec3 lightDirection = normalize(vec3(-0.4, 0.55, 0.8));
+    float diffuse = max(dot(normalize(vNormal), lightDirection), 0.0);
+    float rim = pow(1.0 - max(vNormal.z, 0.0), 3.0);
+    color *= 0.2 + diffuse * 0.9;
+    color += uDetail * rim * 0.08;
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+const cloudFragment = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uSeed;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+
+  float hash(vec3 p) {
+    return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453);
+  }
+  float noise(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(mix(hash(i), hash(i + vec3(1,0,0)), f.x),
+      mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+      mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+      mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
+  }
+  void main() {
+    float cloud = noise(normalize(vPosition) * 9.0 + uSeed);
+    cloud += noise(normalize(vPosition) * 19.0 - uSeed) * 0.45;
+    float alpha = smoothstep(0.72, 1.05, cloud) * 0.38;
+    alpha *= 0.35 + max(vNormal.z, 0.0) * 0.65;
+    gl_FragColor = vec4(uColor, alpha);
+  }
+`;
+
 interface PlanetProps {
   body: PortfolioBody;
   kind: BodyKind;
@@ -34,7 +128,6 @@ interface PlanetProps {
   index: number;
   count: number;
   selectedIndex: number;
-  /** Whether this body's layer is the active one (drives the live ring spin). */
   isActiveLayer: boolean;
   ambientSpeed: number;
   focused: boolean;
@@ -59,17 +152,46 @@ export function Planet({
   const [hovered, setHovered] = useState(false);
   const tmp = useMemo(() => new THREE.Vector3(), []);
   const rig = useRig();
+  const visual = useMemo(() => {
+    const seed = index * 4.71 + orbitRadius * 0.13;
+    return {
+      seed,
+      tilt: (index % 2 === 0 ? 1 : -1) * (0.08 + (index % 3) * 0.11),
+      bands: index % 3 === 1 ? 0.72 : 0.08,
+      spots: index % 3 === 0 ? 0.9 : 0.25,
+      hasClouds: kind === "planet" && index % 2 === 0,
+      hasRing: kind === "planet" && index % 3 === 1,
+    };
+  }, [index, kind, orbitRadius]);
 
   const atmoUniforms = useMemo(
     () => ({
       uColor: { value: new THREE.Color(body.atmosphere) },
-      uPower: { value: 3.0 },
-      uStrength: { value: 0.9 },
+      uPower: { value: 4.0 },
+      uStrength: { value: 0.42 },
     }),
     [body.atmosphere]
   );
 
-  // Skill clusters render as a small constellation of glowing nodes.
+  const surfaceUniforms = useMemo(
+    () => ({
+      uBase: { value: new THREE.Color(body.color) },
+      uDetail: { value: new THREE.Color(body.atmosphere) },
+      uSeed: { value: visual.seed },
+      uBands: { value: visual.bands },
+      uSpots: { value: visual.spots },
+    }),
+    [body.atmosphere, body.color, visual]
+  );
+
+  const cloudUniforms = useMemo(
+    () => ({
+      uColor: { value: new THREE.Color(body.atmosphere) },
+      uSeed: { value: visual.seed },
+    }),
+    [body.atmosphere, visual.seed]
+  );
+
   const clusterNodes = useMemo(() => {
     if (kind !== "cluster") return [];
     const tags = body.tags ?? [];
@@ -90,17 +212,13 @@ export function Planet({
     if (!g) return;
     const t = state.clock.elapsedTime;
     const ambient = t * ambientSpeed * 0.08;
-    // The active layer's ring uses the live damped rotation (so it spins into
-    // focus); inactive layers stay statically placed.
     const focusAngle = isActiveLayer
       ? rig.current.focusAngle
       : focusAngleFor(selectedIndex, count);
     bodyLocalPosition(tmp, orbitRadius, index, count, focusAngle, ambient);
     g.position.copy(tmp);
-    // Gentle bob.
     g.position.y += Math.sin(t * 0.6 + index) * 0.25;
 
-    // Focused bodies grow slightly and pull forward toward the camera.
     const targetScale = focused ? 1.18 : hovered ? 1.08 : 1;
     scaleRef.current = THREE.MathUtils.damp(
       scaleRef.current,
@@ -137,7 +255,6 @@ export function Planet({
       >
         {kind === "cluster" ? (
           <group>
-            {/* Constellation core */}
             <mesh>
               <icosahedronGeometry args={[body.radius * 0.45, 1]} />
               <meshStandardMaterial
@@ -178,20 +295,31 @@ export function Planet({
             ))}
           </group>
         ) : (
-          <>
+          <group rotation={[visual.tilt, 0, -visual.tilt * 0.45]}>
             <mesh ref={meshRef}>
-              <sphereGeometry args={[body.radius, 48, 48]} />
-              <meshStandardMaterial
-                color={body.color}
-                roughness={0.85}
-                metalness={0.15}
-                emissive={body.color}
-                emissiveIntensity={0.08}
+              <icosahedronGeometry args={[body.radius, 6]} />
+              <shaderMaterial
+                vertexShader={surfaceVertex}
+                fragmentShader={surfaceFragment}
+                uniforms={surfaceUniforms}
               />
             </mesh>
-            {/* Atmosphere shell */}
-            <mesh scale={1.12}>
-              <sphereGeometry args={[body.radius, 48, 48]} />
+
+            {visual.hasClouds && (
+              <mesh scale={1.018} rotation={[0, visual.seed, 0]}>
+                <icosahedronGeometry args={[body.radius, 6]} />
+                <shaderMaterial
+                  vertexShader={surfaceVertex}
+                  fragmentShader={cloudFragment}
+                  uniforms={cloudUniforms}
+                  transparent
+                  depthWrite={false}
+                />
+              </mesh>
+            )}
+
+            <mesh scale={1.045}>
+              <icosahedronGeometry args={[body.radius, 5]} />
               <shaderMaterial
                 vertexShader={atmoVertex}
                 fragmentShader={atmoFragment}
@@ -202,24 +330,23 @@ export function Planet({
                 blending={THREE.AdditiveBlending}
               />
             </mesh>
-            {/* Satellites get a thin ring for a "credential" feel */}
-            {kind === "satellite" && (
+
+            {(kind === "satellite" || visual.hasRing) && (
               <mesh rotation={[Math.PI / 2.4, 0, 0.4]}>
-                <ringGeometry args={[body.radius * 1.5, body.radius * 2.1, 64]} />
+                <ringGeometry args={[body.radius * 1.45, body.radius * 2.2, 96]} />
                 <meshBasicMaterial
-                  color={body.atmosphere}
+                  color={kind === "satellite" ? body.atmosphere : "#b8aa91"}
                   transparent
-                  opacity={0.4}
+                  opacity={kind === "satellite" ? 0.28 : 0.48}
                   side={THREE.DoubleSide}
                   depthWrite={false}
                 />
               </mesh>
             )}
-          </>
+          </group>
         )}
       </group>
 
-      {/* Floating label */}
       <Html
         center
         position={[0, body.radius * (kind === "cluster" ? 1.9 : 1.7) + 0.6, 0]}

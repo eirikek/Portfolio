@@ -9,12 +9,6 @@ import { usePortfolioStore } from "@/lib/store";
 const WORLD_UP = new THREE.Vector3(0, 1, 0);
 const MODEL_UP = new THREE.Vector3(0, 1, 0);
 
-/**
- * The contact rocket. It continuously circles in the camera's view space so it
- * is *always* on screen, drifting around the upper part of the frame (above the
- * focused planet and the HUD). Built from primitives; clicking it opens the
- * contact panel. A soft glow + hint label makes it obviously interactive.
- */
 export function RocketContact() {
   const groupRef = useRef<THREE.Group>(null);
   const flameRef = useRef<THREE.Mesh>(null);
@@ -43,15 +37,11 @@ export function RocketContact() {
     if (!g) return;
     const t = state.clock.elapsedTime;
 
-    // Build a basis from the camera so the rocket stays framed on screen.
     camera.getWorldPosition(v.camPos);
     camera.getWorldDirection(v.fwd);
     v.right.crossVectors(v.fwd, WORLD_UP).normalize();
     v.up.crossVectors(v.right, v.fwd).normalize();
 
-    // Wandering flight path: layered sines at incommensurate frequencies, so
-    // the rocket roams naturally and never traces an obvious circle. Biased
-    // upward + forward so it stays on screen and clears the planet and HUD.
     const offRight =
       14 * Math.sin(t * 0.27 + 0.0) + 6.5 * Math.sin(t * 0.61 + 1.3);
     const offUp =
@@ -72,7 +62,6 @@ export function RocketContact() {
     }
     g.position.copy(v.pos);
 
-    // Orient the nose (+Y) along actual travel, smoothed so turns bank gently.
     v.vel.subVectors(v.pos, v.prev);
     v.prev.copy(v.pos);
     if (v.vel.lengthSq() > 1e-6) {
@@ -81,7 +70,6 @@ export function RocketContact() {
       g.quaternion.slerp(v.quat, 1 - Math.exp(-6 * dt));
     }
 
-    // Flicker the flame.
     if (flameRef.current) {
       const f = 1 + Math.sin(t * 30) * 0.18;
       flameRef.current.scale.set(1, f, 1);
@@ -108,23 +96,19 @@ export function RocketContact() {
           setRocketOpen(true);
         }}
       >
-        {/* Generous invisible hitbox */}
         <mesh visible={false}>
           <boxGeometry args={[3, 6, 3]} />
           <meshBasicMaterial />
         </mesh>
 
-        {/* Body */}
         <mesh position={[0, 0, 0]}>
           <cylinderGeometry args={[0.6, 0.6, 2.4, 24]} />
           <meshStandardMaterial color="#e8edf6" metalness={0.6} roughness={0.3} />
         </mesh>
-        {/* Nose */}
         <mesh position={[0, 1.7, 0]}>
           <coneGeometry args={[0.6, 1.1, 24]} />
           <meshStandardMaterial color="#ff5a5f" metalness={0.5} roughness={0.3} />
         </mesh>
-        {/* Window */}
         <mesh position={[0, 0.5, 0.55]}>
           <sphereGeometry args={[0.28, 16, 16]} />
           <meshStandardMaterial
@@ -135,7 +119,6 @@ export function RocketContact() {
             roughness={0.1}
           />
         </mesh>
-        {/* Fins */}
         {[0, 1, 2].map((i) => (
           <mesh
             key={i}
@@ -146,7 +129,6 @@ export function RocketContact() {
             <meshStandardMaterial color="#ff5a5f" metalness={0.4} roughness={0.4} />
           </mesh>
         ))}
-        {/* Flame */}
         <mesh ref={flameRef} position={[0, -1.8, 0]}>
           <coneGeometry args={[0.4, 1.4, 16]} />
           <meshBasicMaterial
@@ -158,7 +140,6 @@ export function RocketContact() {
           />
         </mesh>
 
-        {/* Discoverability glow + hint */}
         <pointLight color="#ffd9a0" intensity={hovered ? 18 : 8} distance={14} />
         <Html
           center
@@ -167,7 +148,7 @@ export function RocketContact() {
           style={{ pointerEvents: "none" }}
         >
           <div className={`rocket-hint ${hovered ? "is-hovered" : ""}`}>
-            Contact ✦
+            Contact
           </div>
         </Html>
       </group>

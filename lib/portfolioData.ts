@@ -34,7 +34,6 @@ export interface PortfolioBody {
 export interface OrbitLayer {
   id: LayerId;
   title: string;
-  subtitle: string;
   kind: BodyKind;
   /** Radius of the orbit ring for this layer. */
   orbitRadius: number;
@@ -55,9 +54,9 @@ export interface ContactInfo {
 }
 
 export const contact: ContactInfo = {
-  name: "Eirik Ekvik",
+  name: "Eirik Kvam",
   tagline: "Full-stack developer · 3D & web experiences",
-  email: "hello@eirikekvik.dev",
+  email: "hello@eirikkvam.dev",
   linkedin: "https://www.linkedin.com/in/eirikek",
   github: "https://github.com/eirikek",
   cv: "/cv.pdf",
@@ -67,7 +66,6 @@ export const layers: OrbitLayer[] = [
   {
     id: "projects",
     title: "Projects",
-    subtitle: "Worlds I've built",
     kind: "planet",
     orbitRadius: 16,
     orbitSpeed: 0.06,
@@ -126,7 +124,6 @@ export const layers: OrbitLayer[] = [
   {
     id: "experience",
     title: "Work Experience",
-    subtitle: "Stations along the way",
     kind: "planet",
     orbitRadius: 20,
     orbitSpeed: 0.045,
@@ -170,11 +167,10 @@ export const layers: OrbitLayer[] = [
   {
     id: "certifications",
     title: "Certifications",
-    subtitle: "Orbiting credentials",
     kind: "satellite",
     orbitRadius: 24,
     orbitSpeed: 0.08,
-    accent: "#7dd3fc",
+    accent: "#4fd1a1",
     bodies: [
       {
         id: "cert-aws",
@@ -225,7 +221,6 @@ export const layers: OrbitLayer[] = [
   {
     id: "skills",
     title: "Skills",
-    subtitle: "Constellations of craft",
     kind: "cluster",
     orbitRadius: 28,
     orbitSpeed: 0.03,

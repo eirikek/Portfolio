@@ -31,7 +31,6 @@ function SceneContents() {
   const setDetailOpen = usePortfolioStore((s) => s.setDetailOpen);
   const detailOpen = usePortfolioStore((s) => s.detailOpen);
 
-  // Debug switch: ?nofx disables post-processing to isolate composer issues.
   const fxDisabled = useMemo(
     () =>
       typeof window !== "undefined" &&
@@ -41,17 +40,14 @@ function SceneContents() {
 
   const handleSelect = (layerIdx: number, i: number) => {
     if (layerIdx === layerIndex && i === bodyIndex) {
-      // Clicking the already-focused planet toggles its detail panel.
       setDetailOpen(!detailOpen);
     } else {
-      // Jump to that exact planet — even if it lives in another layer.
       focusBody(layerIdx, i);
     }
   };
 
   return (
     <>
-      {/* Order matters: rig updates first, then layers + camera read it. */}
       <RigController />
 
       <ambientLight intensity={0.18} />

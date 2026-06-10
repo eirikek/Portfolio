@@ -6,11 +6,6 @@ import { usePortfolioStore } from "@/lib/store";
 import { useInputControls } from "@/hooks/useInputControls";
 import { LayerNavigation } from "./LayerNavigation";
 
-/**
- * The full DOM overlay: intro, planet navigation, the focused-body detail
- * panel, the contact (rocket) panel and control hints. Layout adapts across
- * desktop / tablet / mobile via CSS + the device tier.
- */
 export function ResponsiveHUD() {
   useInputControls();
 
@@ -31,8 +26,10 @@ export function ResponsiveHUD() {
   const body = layer.bodies[bodyIndex];
 
   return (
-    <div className="hud">
-      {/* Intro overlay */}
+    <div
+      className="hud"
+      style={{ "--accent": layer.accent } as React.CSSProperties}
+    >
       <AnimatePresence>
         {!entered && (
           <motion.div
@@ -54,7 +51,9 @@ export function ResponsiveHUD() {
                 Launch experience
               </button>
               <p className="intro__hint">
-                Explore a living solar system — each planet is a project.
+                Every orbit tells a story.
+
+                Every planet solves a problem.
               </p>
             </motion.div>
           </motion.div>
@@ -63,23 +62,15 @@ export function ResponsiveHUD() {
 
       {entered && (
         <>
-          {/* Brand corner */}
-          <div className="brand">
-            <span className="brand__name">{contact.name}</span>
-            <span className="brand__role">{contact.tagline}</span>
-          </div>
-
-          {/* Vertical layer navigation */}
           <LayerNavigation />
 
-          {/* Planet (horizontal) navigation */}
           <div className="planet-nav">
             <button
-              className="nav-btn nav-btn--lg"
+              className="nav-btn"
               aria-label="Previous planet"
               onClick={prevBody}
             >
-              ‹
+              <span aria-hidden>←</span>
             </button>
 
             <div className="planet-nav__center">
@@ -87,11 +78,11 @@ export function ResponsiveHUD() {
               {body.meta && (
                 <p className="planet-nav__meta">{body.meta}</p>
               )}
-              <div className="planet-dots">
+              <div className="nav-markers">
                 {layer.bodies.map((b, i) => (
                   <button
                     key={b.id}
-                    className={`planet-dot ${i === bodyIndex ? "is-active" : ""}`}
+                    className={`nav-marker ${i === bodyIndex ? "is-active" : ""}`}
                     aria-label={b.name}
                     onClick={() => setBody(i)}
                   />
@@ -106,15 +97,14 @@ export function ResponsiveHUD() {
             </div>
 
             <button
-              className="nav-btn nav-btn--lg"
+              className="nav-btn"
               aria-label="Next planet"
               onClick={nextBody}
             >
-              ›
+              <span aria-hidden>→</span>
             </button>
           </div>
 
-          {/* Detail panel */}
           <AnimatePresence>
             {detailOpen && (
               <motion.aside
@@ -133,7 +123,7 @@ export function ResponsiveHUD() {
                     aria-label="Close"
                     onClick={() => setDetailOpen(false)}
                   >
-                    ✕
+                    Close
                   </button>
                 </div>
                 <h3 className="detail-panel__title">{body.name}</h3>
@@ -157,14 +147,13 @@ export function ResponsiveHUD() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {body.link.label} →
+                    {body.link.label}
                   </a>
                 )}
               </motion.aside>
             )}
           </AnimatePresence>
 
-          {/* Contact rocket panel */}
           <AnimatePresence>
             {rocketOpen && (
               <motion.div
@@ -187,7 +176,7 @@ export function ResponsiveHUD() {
                     aria-label="Close"
                     onClick={() => setRocketOpen(false)}
                   >
-                    ✕
+                    Close
                   </button>
                   <p className="contact-panel__eyebrow">Transmission received</p>
                   <h3 className="contact-panel__title">Let&apos;s connect</h3>
@@ -195,7 +184,7 @@ export function ResponsiveHUD() {
 
                   <div className="contact-links">
                     <a className="contact-link" href={`mailto:${contact.email}`}>
-                      <span className="contact-link__icon">✉</span>
+                      <span className="contact-link__icon">MAIL</span>
                       <span>
                         <strong>Email</strong>
                         <small>{contact.email}</small>
@@ -207,7 +196,7 @@ export function ResponsiveHUD() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <span className="contact-link__icon">in</span>
+                      <span className="contact-link__icon">IN</span>
                       <span>
                         <strong>LinkedIn</strong>
                         <small>Professional profile</small>
@@ -219,7 +208,7 @@ export function ResponsiveHUD() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <span className="contact-link__icon">⌨</span>
+                      <span className="contact-link__icon">GIT</span>
                       <span>
                         <strong>GitHub</strong>
                         <small>Code & projects</small>
@@ -231,7 +220,7 @@ export function ResponsiveHUD() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <span className="contact-link__icon">⤓</span>
+                      <span className="contact-link__icon">PDF</span>
                       <span>
                         <strong>Download CV</strong>
                         <small>PDF résumé</small>
@@ -250,15 +239,14 @@ export function ResponsiveHUD() {
             )}
           </AnimatePresence>
 
-          {/* Control hints */}
           <div className="hints">
             {device === "mobile" ? (
-              <span>Swipe ← → planets · ↑ ↓ sections · tap the rocket</span>
+              <span>Swipe horizontally for planets, vertically for sections</span>
             ) : (
               <span>
                 <kbd>←</kbd>
                 <kbd>→</kbd> planets &nbsp; <kbd>↑</kbd>
-                <kbd>↓</kbd> sections &nbsp; find the passing rocket ✦
+                <kbd>↓</kbd> sections &nbsp; click the passing rocket
               </span>
             )}
           </div>
