@@ -28,7 +28,7 @@ export const QUALITY: Record<DeviceTier, QualityPreset> = {
   desktop: {
     starCount: 6000,
     dustCount: 900,
-    bloomIntensity: 1.15,
+    bloomIntensity: 0.72,
     enableBloom: true,
     enableDof: false,
     dpr: [1, 2],
@@ -37,7 +37,7 @@ export const QUALITY: Record<DeviceTier, QualityPreset> = {
   tablet: {
     starCount: 3500,
     dustCount: 450,
-    bloomIntensity: 0.9,
+    bloomIntensity: 0.58,
     enableBloom: true,
     enableDof: false,
     dpr: [1, 1.5],

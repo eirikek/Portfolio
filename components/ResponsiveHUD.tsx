@@ -157,6 +157,21 @@ export function ResponsiveHUD() {
           </AnimatePresence>
 
           <AnimatePresence>
+            {!rocketOpen && (
+              <motion.p
+                className="rocket-caption"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+              >
+                <span className="rocket-caption__marker" aria-hidden />
+                Catch the rocket for contact
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
             {rocketOpen && (
               <motion.div
                 className="contact-backdrop"

@@ -77,12 +77,12 @@ const surfaceFragment = /* glsl */ `
     float pulse = 0.85 + 0.15 * sin(uTime * 1.4);
 
     vec3 col = mix(uColorCold, uColorHot, smoothstep(0.35, 0.85, surface));
-    col *= 0.7 + surface * 0.9;
+    col *= 0.58 + surface * 0.68;
     col *= pulse;
 
     // Limb brightening near the silhouette edge.
     float fres = pow(1.0 - max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0), 2.0);
-    col += uColorHot * fres * 0.6;
+    col += uColorHot * fres * 0.32;
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -129,7 +129,7 @@ export function Sun({ radius = 6 }: { radius?: number }) {
     () => ({
       uTime: { value: 0 },
       uColor: { value: new THREE.Color("#ffae42") },
-      uIntensity: { value: 1.0 },
+      uIntensity: { value: 0.48 },
     }),
     []
   );
@@ -138,7 +138,7 @@ export function Sun({ radius = 6 }: { radius?: number }) {
     () => ({
       uTime: { value: 0 },
       uColor: { value: new THREE.Color("#ff7b00") },
-      uIntensity: { value: 0.55 },
+      uIntensity: { value: 0.16 },
     }),
     []
   );
@@ -149,7 +149,7 @@ export function Sun({ radius = 6 }: { radius?: number }) {
     glowUniforms.uTime.value = t;
     glow2Uniforms.uTime.value = t;
     if (lightRef.current) {
-      lightRef.current.intensity = 900 + Math.sin(t * 1.4) * 120;
+      lightRef.current.intensity = 420 + Math.sin(t * 1.4) * 45;
     }
   });
 
@@ -169,7 +169,7 @@ export function Sun({ radius = 6 }: { radius?: number }) {
       {/* Inner halo */}
       <Billboard>
         <mesh>
-          <planeGeometry args={[radius * 4.2, radius * 4.2]} />
+          <planeGeometry args={[radius * 3.2, radius * 3.2]} />
           <shaderMaterial
             ref={glowRef}
             vertexShader={glowVertex}
@@ -186,7 +186,7 @@ export function Sun({ radius = 6 }: { radius?: number }) {
       {/* Outer atmosphere bloom */}
       <Billboard>
         <mesh>
-          <planeGeometry args={[radius * 8, radius * 8]} />
+          <planeGeometry args={[radius * 5.2, radius * 5.2]} />
           <shaderMaterial
             ref={glow2Ref}
             vertexShader={glowVertex}
@@ -203,8 +203,8 @@ export function Sun({ radius = 6 }: { radius?: number }) {
       <pointLight
         ref={lightRef}
         color="#ffd9a0"
-        intensity={900}
-        distance={120}
+        intensity={420}
+        distance={100}
         decay={1.6}
       />
     </group>

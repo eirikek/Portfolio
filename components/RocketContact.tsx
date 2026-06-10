@@ -2,16 +2,19 @@
 
 import { useRef, useMemo, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { usePortfolioStore } from "@/lib/store";
 
 const WORLD_UP = new THREE.Vector3(0, 1, 0);
 const MODEL_UP = new THREE.Vector3(0, 1, 0);
+const WINDOW_BLUE = new THREE.Color("#6cc6ff");
+const WINDOW_RED = new THREE.Color("#ff3048");
 
 export function RocketContact() {
   const groupRef = useRef<THREE.Group>(null);
   const flameRef = useRef<THREE.Mesh>(null);
+  const letterMatRef = useRef<THREE.MeshStandardMaterial>(null);
+  const windowMatRef = useRef<THREE.MeshStandardMaterial>(null);
   const [hovered, setHovered] = useState(false);
   const setRocketOpen = usePortfolioStore((s) => s.setRocketOpen);
   const device = usePortfolioStore((s) => s.device);
@@ -32,13 +35,13 @@ export function RocketContact() {
   );
   const ready = useRef(false);
 
-  // "CONTACT" painted around the hull like ship lettering. Repeated several
+  // "CONTACT ME" painted around the hull like ship lettering. Repeated several
   // times around the circumference so a copy is almost always facing the
   // viewer as the rocket tumbles along its path.
   const contactTex = useMemo(() => {
     if (typeof document === "undefined") return null;
-    const w = 2048;
-    const h = 384;
+    const w = 3072;
+    const h = 512;
     const canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
@@ -48,14 +51,15 @@ export function RocketContact() {
     ctx.font = "900 150px var(--font-heading), Arial, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const reps = 4;
+    const reps = 3;
     for (let i = 0; i < reps; i++) {
       const x = (w * (i + 0.5)) / reps;
-      ctx.lineWidth = 16;
-      ctx.strokeStyle = "rgba(255,255,255,0.92)";
-      ctx.strokeText("CONTACT", x, h / 2);
+      ctx.lineWidth = 20;
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "rgba(255,255,255,0.95)";
+      ctx.strokeText("CONTACT ME", x, h / 2);
       ctx.fillStyle = "#ff5a5f";
-      ctx.fillText("CONTACT", x, h / 2);
+      ctx.fillText("CONTACT ME", x, h / 2);
     }
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -114,6 +118,24 @@ export function RocketContact() {
       const f = 1 + Math.sin(t * 30) * 0.18;
       flameRef.current.scale.set(1, f, 1);
     }
+
+    if (letterMatRef.current) {
+      const idle = 0.55 + Math.sin(t * 2.4) * 0.12;
+      const target = hovered ? 1.6 : idle;
+      letterMatRef.current.emissiveIntensity = THREE.MathUtils.lerp(
+        letterMatRef.current.emissiveIntensity,
+        target,
+        1 - Math.exp(-8 * dt)
+      );
+    }
+
+    if (windowMatRef.current) {
+      const redBlink = hovered && Math.sin(t * 11) > 0;
+      const targetColor = redBlink ? WINDOW_RED : WINDOW_BLUE;
+      windowMatRef.current.color.lerp(targetColor, 1 - Math.exp(-18 * dt));
+      windowMatRef.current.emissive.lerp(targetColor, 1 - Math.exp(-18 * dt));
+      windowMatRef.current.emissiveIntensity = redBlink ? 1.8 : 0.6;
+    }
   });
 
   const scale = device === "mobile" ? 1.7 : 1.25;
@@ -149,10 +171,11 @@ export function RocketContact() {
           <mesh position={[0, 0.1, 0]}>
             <cylinderGeometry args={[0.605, 0.605, 1.5, 24, 1, true]} />
             <meshStandardMaterial
+              ref={letterMatRef}
               map={contactTex}
               emissive="#ff5a5f"
               emissiveMap={contactTex}
-              emissiveIntensity={0.45}
+              emissiveIntensity={0.55}
               metalness={0.3}
               roughness={0.45}
               transparent
@@ -167,6 +190,7 @@ export function RocketContact() {
         <mesh position={[0, 0.5, 0.55]}>
           <sphereGeometry args={[0.28, 16, 16]} />
           <meshStandardMaterial
+            ref={windowMatRef}
             color="#6cc6ff"
             emissive="#6cc6ff"
             emissiveIntensity={0.6}
@@ -196,20 +220,6 @@ export function RocketContact() {
         </mesh>
 
         <pointLight color="#ffd9a0" intensity={hovered ? 18 : 8} distance={14} />
-        <Html
-          center
-          position={[0, 3, 0]}
-          distanceFactor={20}
-          style={{ pointerEvents: "none" }}
-        >
-          <div className={`rocket-hint ${hovered ? "is-hovered" : ""}`}>
-            <span className="rocket-hint__icon" aria-hidden>✉</span>
-            <span className="rocket-hint__text">
-              <strong>Contact me</strong>
-              <small>click the rocket</small>
-            </span>
-          </div>
-        </Html>
       </group>
     </group>
   );
