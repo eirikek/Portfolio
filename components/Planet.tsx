@@ -42,6 +42,7 @@ const surfaceFragment = /* glsl */ `
   uniform float uSeed;
   uniform float uBands;
   uniform float uSpots;
+  uniform float uVariant;
   varying vec3 vNormal;
   varying vec3 vPosition;
 
@@ -82,8 +83,31 @@ const surfaceFragment = /* glsl */ `
     float bands = sin((p.y + terrain * 0.12) * 34.0 + uSeed) * 0.5 + 0.5;
     float mask = mix(terrain, bands, uBands);
     float crater = smoothstep(0.79, 0.83, fine) * uSpots;
-    vec3 color = mix(uBase * 0.62, uDetail, smoothstep(0.3, 0.78, mask));
-    color *= 1.0 - crater * 0.42;
+    float latitude = abs(p.y);
+    float ridges = abs(sin((p.x + terrain * 0.35) * 24.0));
+    vec3 color;
+
+    if (uVariant < 0.5) {
+      color = mix(uBase * 0.52, uDetail, smoothstep(0.34, 0.72, terrain));
+    } else if (uVariant < 1.5) {
+      color = mix(uBase * 0.55, uDetail, smoothstep(0.18, 0.82, bands));
+      color *= 0.88 + sin(p.y * 72.0 + uSeed) * 0.12;
+    } else if (uVariant < 2.5) {
+      color = mix(uBase * 0.45, uDetail * 0.72, smoothstep(0.38, 0.7, fine));
+      color *= 1.0 - crater * 0.58;
+    } else if (uVariant < 3.5) {
+      float ice = smoothstep(0.62, 0.86, latitude + terrain * 0.12);
+      color = mix(uBase * 0.48, uDetail, smoothstep(0.42, 0.64, terrain));
+      color = mix(color, vec3(0.88, 0.95, 1.0), ice * 0.82);
+    } else if (uVariant < 4.5) {
+      float lava = smoothstep(0.78, 0.96, ridges + fine * 0.25);
+      color = mix(uBase * 0.2, uDetail * 1.25, lava);
+      color *= 0.72 + terrain * 0.38;
+    } else {
+      float swirls = sin((p.x + p.z + terrain * 0.2) * 19.0 + uSeed) * 0.5 + 0.5;
+      color = mix(uBase * 0.58, uDetail, smoothstep(0.28, 0.78, swirls));
+      color *= 0.82 + mask * 0.3;
+    }
 
     vec3 lightDirection = normalize(vec3(-0.4, 0.55, 0.8));
     float diffuse = max(dot(normalize(vNormal), lightDirection), 0.0);
@@ -154,13 +178,16 @@ export function Planet({
   const rig = useRig();
   const visual = useMemo(() => {
     const seed = index * 4.71 + orbitRadius * 0.13;
+    const isProject = kind === "project";
+    const isExperience = kind === "experience";
     return {
       seed,
+      variant: isProject ? 0 : isExperience ? 2 : index % 6,
       tilt: (index % 2 === 0 ? 1 : -1) * (0.08 + (index % 3) * 0.11),
-      bands: index % 3 === 1 ? 0.72 : 0.08,
-      spots: index % 3 === 0 ? 0.9 : 0.25,
-      hasClouds: kind === "planet" && index % 2 === 0,
-      hasRing: kind === "planet" && index % 3 === 1,
+      bands: 0.06,
+      spots: isExperience ? 0.72 : 0.18,
+      hasClouds: isProject,
+      detail: isExperience ? 5 : 6,
     };
   }, [index, kind, orbitRadius]);
 
@@ -180,6 +207,7 @@ export function Planet({
       uSeed: { value: visual.seed },
       uBands: { value: visual.bands },
       uSpots: { value: visual.spots },
+      uVariant: { value: visual.variant },
     }),
     [body.atmosphere, body.color, visual]
   );
@@ -297,7 +325,7 @@ export function Planet({
         ) : (
           <group rotation={[visual.tilt, 0, -visual.tilt * 0.45]}>
             <mesh ref={meshRef}>
-              <icosahedronGeometry args={[body.radius, 6]} />
+              <icosahedronGeometry args={[body.radius, visual.detail]} />
               <shaderMaterial
                 vertexShader={surfaceVertex}
                 fragmentShader={surfaceFragment}
@@ -331,18 +359,25 @@ export function Planet({
               />
             </mesh>
 
-            {(kind === "satellite" || visual.hasRing) && (
+            {kind === "satellite" && (
               <mesh rotation={[Math.PI / 2.4, 0, 0.4]}>
-                <ringGeometry args={[body.radius * 1.45, body.radius * 2.2, 96]} />
+                <ringGeometry
+                  args={[
+                    body.radius * 1.45,
+                    body.radius * 2.2,
+                    96,
+                  ]}
+                />
                 <meshBasicMaterial
-                  color={kind === "satellite" ? body.atmosphere : "#b8aa91"}
+                  color={body.atmosphere}
                   transparent
-                  opacity={kind === "satellite" ? 0.28 : 0.48}
+                  opacity={0.28}
                   side={THREE.DoubleSide}
                   depthWrite={false}
                 />
               </mesh>
             )}
+
           </group>
         )}
       </group>
