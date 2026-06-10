@@ -24,6 +24,10 @@ export function ResponsiveHUD() {
 
   const layer = layers[layerIndex];
   const body = layer.bodies[bodyIndex];
+  const previewMeta =
+    layer.id === "experience" || layer.id === "certifications"
+      ? body.meta?.split(" · ")[0]
+      : body.meta;
 
   return (
     <div
@@ -72,8 +76,8 @@ export function ResponsiveHUD() {
 
             <div className="planet-nav__center">
               <h2 className="planet-nav__title">{body.name}</h2>
-              {body.meta && (
-                <p className="planet-nav__meta">{body.meta}</p>
+              {previewMeta && (
+                <p className="planet-nav__meta">{previewMeta}</p>
               )}
               <div className="nav-markers">
                 {layer.bodies.map((b, i) => (
