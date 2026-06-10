@@ -32,9 +32,15 @@ export function bodyLocalPosition(
   );
 }
 
-/** Vertical offset of a layer's plane given the (fractional) active layer. */
+/**
+ * Vertical offset of a layer's plane given the (fractional) active layer.
+ *
+ * Higher-index layers (further down the menu) sit lower in 3D space, so moving
+ * "down" the menu descends through the stack: the next layer rises from below
+ * and the current one exits via the top.
+ */
 export function layerY(layerIndex: number, activeFloat: number): number {
-  return (layerIndex - activeFloat) * LAYER_GAP;
+  return (activeFloat - layerIndex) * LAYER_GAP;
 }
 
 /** Smooth, frame-rate-independent damping toward a target value. */
