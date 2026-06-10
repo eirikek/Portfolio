@@ -32,6 +32,37 @@ export function RocketContact() {
   );
   const ready = useRef(false);
 
+  // "CONTACT" painted around the hull like ship lettering. Repeated several
+  // times around the circumference so a copy is almost always facing the
+  // viewer as the rocket tumbles along its path.
+  const contactTex = useMemo(() => {
+    if (typeof document === "undefined") return null;
+    const w = 2048;
+    const h = 384;
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = "900 150px var(--font-heading), Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const reps = 4;
+    for (let i = 0; i < reps; i++) {
+      const x = (w * (i + 0.5)) / reps;
+      ctx.lineWidth = 16;
+      ctx.strokeStyle = "rgba(255,255,255,0.92)";
+      ctx.strokeText("CONTACT", x, h / 2);
+      ctx.fillStyle = "#ff5a5f";
+      ctx.fillText("CONTACT", x, h / 2);
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    return tex;
+  }, []);
+
   useFrame((state, dt) => {
     const g = groupRef.current;
     if (!g) return;
@@ -55,6 +86,15 @@ export function RocketContact() {
       .addScaledVector(v.fwd, fwdDist)
       .addScaledVector(v.right, offRight)
       .addScaledVector(v.up, offUp);
+
+    // Keep the rocket clear of the sun (at the origin, radius 6) so it never
+    // clips through it. Pushing radially outward is continuous at the boundary,
+    // so there's no visible pop — it just glances around the star.
+    const SUN_KEEPOUT = 16;
+    const distFromSun = v.pos.length();
+    if (distFromSun < SUN_KEEPOUT) {
+      v.pos.multiplyScalar(SUN_KEEPOUT / Math.max(distFromSun, 0.0001));
+    }
 
     if (!ready.current) {
       v.prev.copy(v.pos);
@@ -105,6 +145,21 @@ export function RocketContact() {
           <cylinderGeometry args={[0.6, 0.6, 2.4, 24]} />
           <meshStandardMaterial color="#e8edf6" metalness={0.6} roughness={0.3} />
         </mesh>
+        {contactTex && (
+          <mesh position={[0, 0.1, 0]}>
+            <cylinderGeometry args={[0.605, 0.605, 1.5, 24, 1, true]} />
+            <meshStandardMaterial
+              map={contactTex}
+              emissive="#ff5a5f"
+              emissiveMap={contactTex}
+              emissiveIntensity={0.45}
+              metalness={0.3}
+              roughness={0.45}
+              transparent
+              alphaTest={0.05}
+            />
+          </mesh>
+        )}
         <mesh position={[0, 1.7, 0]}>
           <coneGeometry args={[0.6, 1.1, 24]} />
           <meshStandardMaterial color="#ff5a5f" metalness={0.5} roughness={0.3} />
@@ -148,7 +203,11 @@ export function RocketContact() {
           style={{ pointerEvents: "none" }}
         >
           <div className={`rocket-hint ${hovered ? "is-hovered" : ""}`}>
-            Contact
+            <span className="rocket-hint__icon" aria-hidden>✉</span>
+            <span className="rocket-hint__text">
+              <strong>Contact me</strong>
+              <small>click the rocket</small>
+            </span>
           </div>
         </Html>
       </group>

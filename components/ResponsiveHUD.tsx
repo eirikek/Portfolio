@@ -5,6 +5,7 @@ import { layers, contact } from "@/lib/portfolioData";
 import { usePortfolioStore } from "@/lib/store";
 import { useInputControls } from "@/hooks/useInputControls";
 import { LayerNavigation } from "./LayerNavigation";
+import { NavArrow } from "./NavArrow";
 
 export function ResponsiveHUD() {
   useInputControls();
@@ -20,7 +21,6 @@ export function ResponsiveHUD() {
   const nextBody = usePortfolioStore((s) => s.nextBody);
   const prevBody = usePortfolioStore((s) => s.prevBody);
   const setBody = usePortfolioStore((s) => s.setBody);
-  const device = usePortfolioStore((s) => s.device);
 
   const layer = layers[layerIndex];
   const body = layer.bodies[bodyIndex];
@@ -44,16 +44,13 @@ export function ResponsiveHUD() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.8 }}
             >
-              <p className="intro__eyebrow">Welcome to the portfolio of</p>
+              <p className="intro__eyebrow">EXPLORE MY UNIVERSE</p>
               <h1 className="intro__name">{contact.name}</h1>
-              <p className="intro__tagline">{contact.tagline}</p>
               <button className="cta" onClick={enter}>
                 Launch experience
               </button>
               <p className="intro__hint">
-                Every orbit tells a story.
-
-                Every planet solves a problem.
+                Projects, work experience, certifications and technologies that have shaped my journey.
               </p>
             </motion.div>
           </motion.div>
@@ -70,7 +67,7 @@ export function ResponsiveHUD() {
               aria-label="Previous planet"
               onClick={prevBody}
             >
-              <span aria-hidden>←</span>
+              <NavArrow direction="left" />
             </button>
 
             <div className="planet-nav__center">
@@ -101,7 +98,7 @@ export function ResponsiveHUD() {
               aria-label="Next planet"
               onClick={nextBody}
             >
-              <span aria-hidden>→</span>
+              <NavArrow direction="right" />
             </button>
           </div>
 
@@ -238,18 +235,6 @@ export function ResponsiveHUD() {
               </motion.div>
             )}
           </AnimatePresence>
-
-          <div className="hints">
-            {device === "mobile" ? (
-              <span>Swipe horizontally for planets, vertically for sections</span>
-            ) : (
-              <span>
-                <kbd>←</kbd>
-                <kbd>→</kbd> planets &nbsp; <kbd>↑</kbd>
-                <kbd>↓</kbd> sections &nbsp; click the passing rocket
-              </span>
-            )}
-          </div>
         </>
       )}
     </div>

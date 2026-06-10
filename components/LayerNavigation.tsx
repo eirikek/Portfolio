@@ -2,6 +2,7 @@
 
 import { layers } from "@/lib/portfolioData";
 import { usePortfolioStore } from "@/lib/store";
+import { NavArrow } from "./NavArrow";
 
 export function LayerNavigation() {
   const layerIndex = usePortfolioStore((s) => s.layerIndex);
@@ -15,7 +16,7 @@ export function LayerNavigation() {
         aria-label="Previous layer"
         onClick={prevLayer}
       >
-        <span aria-hidden>↑</span>
+        <NavArrow direction="up" />
       </button>
 
       <div className="layer-list">
@@ -36,7 +37,7 @@ export function LayerNavigation() {
         aria-label="Next layer"
         onClick={nextLayer}
       >
-        <span aria-hidden>↓</span>
+        <NavArrow direction="down" />
       </button>
     </div>
   );
