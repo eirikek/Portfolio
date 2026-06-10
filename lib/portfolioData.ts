@@ -235,7 +235,7 @@ export const layers: OrbitLayer[] = [
         name: "NTNU",
         description:
           "Computer Science studies at the Norwegian University of Science and Technology, building a broad foundation across software development, databases, systems and collaborative project work.",
-        meta: "BSc · Computer Science",
+        meta: "BSc Computer Science",
         tags: ["Computer Science", "Software Development", "Databases", "Systems"],
         color: "#631527",
         atmosphere: "#b85c6e",

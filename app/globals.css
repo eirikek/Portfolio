@@ -332,6 +332,9 @@ h3,
   width: min(380px, calc(100vw - 48px));
   max-height: calc(100vh - 32px);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  pointer-events: auto;
   padding: 26px 28px;
   background: var(--panel);
 }
@@ -512,25 +515,30 @@ h3,
   }
   .layer-list {
     flex-direction: row;
-    overflow-x: auto;
-    max-width: calc(100vw - 24px);
+    justify-content: center;
+    max-width: calc(100vw - 20px);
+    gap: 4px;
     padding: 0;
   }
   .layer-link {
-    padding: 8px 12px;
+    padding: 7px 10px;
+  }
+  .layer-link .nav-marker {
+    display: none;
   }
   .layer-link__label {
-    font-size: 12px;
+    font-size: 11.5px;
   }
   .detail-panel {
     top: auto;
-    bottom: 150px;
+    bottom: 142px;
     left: 12px;
     right: 12px;
     transform: none;
     width: auto;
-    max-height: 46vh;
-    padding: 20px;
+    height: auto;
+    max-height: calc(100vh - 310px);
+    padding: 18px 18px 22px;
   }
 
   .planet-nav {

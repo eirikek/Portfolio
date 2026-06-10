@@ -166,7 +166,7 @@ export function ResponsiveHUD() {
                 transition={{ delay: 0.4, duration: 0.5 }}
               >
                 <span className="rocket-caption__marker" aria-hidden />
-                Catch the rocket for contact
+                Catch the rocket for contact details ... if you can ;)
               </motion.p>
             )}
           </AnimatePresence>
