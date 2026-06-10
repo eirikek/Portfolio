@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, Suspense } from "react";
+import { useRef, useMemo, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import {
   EffectComposer,
@@ -30,6 +30,14 @@ function SceneContents() {
   const setBody = usePortfolioStore((s) => s.setBody);
   const setDetailOpen = usePortfolioStore((s) => s.setDetailOpen);
   const detailOpen = usePortfolioStore((s) => s.detailOpen);
+
+  // Debug switch: ?nofx disables post-processing to isolate composer issues.
+  const fxDisabled = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).has("nofx"),
+    []
+  );
 
   const handleSelect = (layerIdx: number, i: number) => {
     if (layerIdx === layerIndex && i === bodyIndex) {
@@ -68,7 +76,8 @@ function SceneContents() {
 
       <CameraController />
 
-      <EffectComposer enableNormalPass={false}>
+      {!fxDisabled && (
+      <EffectComposer enableNormalPass={false} multisampling={0}>
         {[
           quality.enableBloom ? (
             <Bloom
@@ -76,7 +85,6 @@ function SceneContents() {
               intensity={quality.bloomIntensity}
               luminanceThreshold={0.35}
               luminanceSmoothing={0.9}
-              mipmapBlur
               radius={0.8}
             />
           ) : null,
@@ -91,6 +99,7 @@ function SceneContents() {
           <Vignette key="vignette" eskil={false} offset={0.25} darkness={0.85} />,
         ].filter(Boolean) as JSX.Element[]}
       </EffectComposer>
+      )}
     </>
   );
 }
@@ -103,11 +112,17 @@ export function SpaceScene() {
     <Canvas
       dpr={quality.dpr}
       gl={{
-        antialias: true,
+        // AA is handled by the EffectComposer's multisampling; enabling the
+        // context's own MSAA alongside post-processing causes flicker.
+        antialias: false,
         powerPreference: "high-performance",
         alpha: false,
+        stencil: false,
       }}
-      camera={{ fov: 55, near: 0.1, far: 2000, position: [40, 18, 50] }}
+      // A tight near/far ratio keeps depth precision high — a wide ratio
+      // (e.g. 0.1 → 2000) causes z-fighting that reads as rapid flickering
+      // on planets and stars as the camera drifts.
+      camera={{ fov: 55, near: 3, far: 1200, position: [40, 18, 50] }}
       style={{ position: "absolute", inset: 0 }}
     >
       <color attach="background" args={["#03040c"]} />
