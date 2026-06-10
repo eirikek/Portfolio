@@ -4,17 +4,28 @@ import { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { layers } from "@/lib/portfolioData";
-import { bodyLocalPosition, layerY, dampV3 } from "@/lib/orbits";
+import {
+  frontSlotPosition,
+  focusAngleFor,
+  layerY,
+  dampV3,
+} from "@/lib/orbits";
 import { useRig } from "@/lib/rig";
 import { usePortfolioStore, type DeviceTier } from "@/lib/store";
 
+const TWO_PI = Math.PI * 2;
+
 /**
- * Updates the shared rig state (fractional active layer). Rendered first so
- * the orbital layers and the camera read a freshly-damped value each frame.
+ * Updates the shared rig state (fractional active layer + the damped ring
+ * rotation). Rendered first so the orbital layers and the camera read a
+ * freshly-damped value each frame.
  */
 export function RigController() {
   const rig = useRig();
   const layerIndex = usePortfolioStore((s) => s.layerIndex);
+  const bodyIndex = usePortfolioStore((s) => s.bodyIndex);
+  const prevLayer = useRef(layerIndex);
+
   useFrame((_, dt) => {
     rig.current.activeFloat = THREE.MathUtils.damp(
       rig.current.activeFloat,
@@ -22,6 +33,25 @@ export function RigController() {
       4,
       dt
     );
+
+    const count = layers[layerIndex].bodies.length;
+    let target = focusAngleFor(bodyIndex, count);
+    // Unwrap to the nearest equivalent angle so the ring rotates the short way.
+    while (target - rig.current.focusAngle > Math.PI) target -= TWO_PI;
+    while (target - rig.current.focusAngle < -Math.PI) target += TWO_PI;
+
+    if (prevLayer.current !== layerIndex) {
+      // Don't spin the ring when merely switching layers — snap it.
+      rig.current.focusAngle = target;
+      prevLayer.current = layerIndex;
+    } else {
+      rig.current.focusAngle = THREE.MathUtils.damp(
+        rig.current.focusAngle,
+        target,
+        5,
+        dt
+      );
+    }
   });
   return null;
 }
@@ -41,7 +71,6 @@ export function CameraController() {
   const camera = useThree((s) => s.camera);
 
   const layerIndex = usePortfolioStore((s) => s.layerIndex);
-  const bodyIndex = usePortfolioStore((s) => s.bodyIndex);
   const entered = usePortfolioStore((s) => s.entered);
   const device = usePortfolioStore((s) => s.device);
 
@@ -58,15 +87,10 @@ export function CameraController() {
     const layer = layers[layerIndex];
     const ambient = t * layer.orbitSpeed * 0.08;
 
-    // Focused body's world position (same maths the planet uses).
-    bodyLocalPosition(
-      bodyLocal,
-      layer.orbitRadius,
-      bodyIndex,
-      layer.bodies.length,
-      bodyIndex,
-      ambient
-    );
+    // The camera frames the *fixed* focus slot, not a specific planet — the
+    // selected planet rotates into this slot, which is what makes the orbit
+    // visibly revolve around the sun.
+    frontSlotPosition(bodyLocal, layer.orbitRadius, ambient);
     const worldY = layerY(layerIndex, rig.current.activeFloat);
 
     if (!entered) {

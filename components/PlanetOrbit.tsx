@@ -89,6 +89,7 @@ export function PlanetOrbit({
           index={i}
           count={layer.bodies.length}
           selectedIndex={selectedIndex}
+          isActiveLayer={isActive}
           ambientSpeed={layer.orbitSpeed}
           focused={isActive && i === selectedIndex}
           onSelect={() => onSelectBody(i)}

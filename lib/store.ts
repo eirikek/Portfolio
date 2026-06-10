@@ -28,6 +28,9 @@ interface PortfolioState {
   nextBody: () => void;
   prevBody: () => void;
   setBody: (index: number) => void;
+  /** Jump straight to a specific body in a specific layer (e.g. clicking a
+   *  planet that belongs to a different orbital layer). */
+  focusBody: (layerIndex: number, bodyIndex: number) => void;
 
   setRocketOpen: (open: boolean) => void;
   setDetailOpen: (open: boolean) => void;
@@ -79,6 +82,14 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     set((s) => {
       const count = layers[s.layerIndex].bodies.length;
       return { bodyIndex: ((index % count) + count) % count, detailOpen: false };
+    }),
+  focusBody: (layerIndex, bodyIndex) =>
+    set(() => {
+      const li =
+        ((layerIndex % layers.length) + layers.length) % layers.length;
+      const count = layers[li].bodies.length;
+      const bi = ((bodyIndex % count) + count) % count;
+      return { layerIndex: li, bodyIndex: bi, detailOpen: false };
     }),
 
   setRocketOpen: (open) => set(() => ({ rocketOpen: open })),

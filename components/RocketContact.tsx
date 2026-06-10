@@ -1,15 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useRef, useMemo, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { usePortfolioStore } from "@/lib/store";
 
+const WORLD_UP = new THREE.Vector3(0, 1, 0);
+const MODEL_UP = new THREE.Vector3(0, 1, 0);
+
 /**
- * A discoverable contact rocket that periodically drifts across the scene.
- * Built from primitives. Clicking it opens the contact panel (DOM, in the
- * HUD). A soft pulsing glow + hint label makes it findable.
+ * The contact rocket. It continuously circles in the camera's view space so it
+ * is *always* on screen, drifting around the upper part of the frame (above the
+ * focused planet and the HUD). Built from primitives; clicking it opens the
+ * contact panel. A soft glow + hint label makes it obviously interactive.
  */
 export function RocketContact() {
   const groupRef = useRef<THREE.Group>(null);
@@ -17,34 +21,67 @@ export function RocketContact() {
   const [hovered, setHovered] = useState(false);
   const setRocketOpen = usePortfolioStore((s) => s.setRocketOpen);
   const device = usePortfolioStore((s) => s.device);
+  const camera = useThree((s) => s.camera);
 
-  // Travel period and path differ slightly so it feels organic.
-  const period = 34;
+  const v = useMemo(
+    () => ({
+      camPos: new THREE.Vector3(),
+      fwd: new THREE.Vector3(),
+      right: new THREE.Vector3(),
+      up: new THREE.Vector3(),
+      center: new THREE.Vector3(),
+      vel: new THREE.Vector3(),
+      quat: new THREE.Quaternion(),
+    }),
+    []
+  );
 
   useFrame((state) => {
     const g = groupRef.current;
     if (!g) return;
     const t = state.clock.elapsedTime;
-    const phase = (t % period) / period; // 0..1 across the scene
 
-    // Arc across the upper-right of the view, drifting down-left to up-right.
-    const x = THREE.MathUtils.lerp(-46, 46, phase);
-    const y = 16 + Math.sin(phase * Math.PI) * 10;
-    const z = -18 + Math.cos(phase * Math.PI * 2) * 8;
-    g.position.set(x, y, z);
+    // Build a basis from the camera so the orbit stays framed on screen.
+    camera.getWorldPosition(v.camPos);
+    camera.getWorldDirection(v.fwd);
+    v.right.crossVectors(v.fwd, WORLD_UP).normalize();
+    v.up.crossVectors(v.right, v.fwd).normalize();
 
-    // Point the rocket along its travel direction (mostly +x, slight tilt).
-    g.rotation.z = -Math.PI / 2 + Math.sin(phase * Math.PI) * 0.2;
-    g.rotation.y = Math.sin(t * 0.5) * 0.15;
+    // Ellipse in front of the camera, biased upward so it clears the HUD.
+    const fwdDist = 36;
+    const rx = 17;
+    const ry = 9;
+    const upBias = 8;
+    const theta = t * 0.45;
+    const c = Math.cos(theta);
+    const s = Math.sin(theta);
+
+    v.center
+      .copy(v.camPos)
+      .addScaledVector(v.fwd, fwdDist)
+      .addScaledVector(v.up, upBias);
+    g.position
+      .copy(v.center)
+      .addScaledVector(v.right, c * rx)
+      .addScaledVector(v.up, s * ry);
+
+    // Orient the nose (+Y) along the travel tangent.
+    v.vel
+      .set(0, 0, 0)
+      .addScaledVector(v.right, -s * rx)
+      .addScaledVector(v.up, c * ry)
+      .normalize();
+    v.quat.setFromUnitVectors(MODEL_UP, v.vel);
+    g.quaternion.copy(v.quat);
 
     // Flicker the flame.
     if (flameRef.current) {
-      const s = 1 + Math.sin(t * 30) * 0.18;
-      flameRef.current.scale.set(1, s, 1);
+      const f = 1 + Math.sin(t * 30) * 0.18;
+      flameRef.current.scale.set(1, f, 1);
     }
   });
 
-  const scale = device === "mobile" ? 1.5 : 1.1;
+  const scale = device === "mobile" ? 1.7 : 1.25;
 
   return (
     <group ref={groupRef}>

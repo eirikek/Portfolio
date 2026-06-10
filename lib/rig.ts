@@ -8,6 +8,8 @@ import { createContext, useContext } from "react";
 export interface RigState {
   /** Fractional active layer index (lerped toward the store's layerIndex). */
   activeFloat: number;
+  /** Damped rotation of the active layer's ring (drives the orbit spin). */
+  focusAngle: number;
 }
 
 export const RigContext = createContext<{ current: RigState } | null>(null);

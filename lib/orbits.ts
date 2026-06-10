@@ -9,22 +9,44 @@ export const FOCUS_ANGLE = 0;
 /**
  * Local position of a body on its orbit ring.
  *
- * The selected body is rotated to FOCUS_ANGLE (front-right of the scene); the
- * others spread evenly around the ring. A tiny ambient term keeps everything
- * gently drifting so the system feels alive without ever losing focus — the
- * camera uses this exact same function, so it stays locked on regardless.
+ * `focusAngle` rotates the entire ring around the sun; the bodies keep their
+ * fixed relative spacing. Selecting the next/previous body simply damps
+ * `focusAngle` toward a new target (see `focusAngleFor`), so the whole solar
+ * system visibly revolves to bring the chosen planet into focus rather than
+ * snapping. A tiny ambient term adds perpetual gentle drift.
  */
 export function bodyLocalPosition(
   target: THREE.Vector3,
   orbitRadius: number,
   index: number,
   count: number,
-  selectedIndex: number,
+  focusAngle: number,
   ambient: number
 ): THREE.Vector3 {
   const base = (index / count) * Math.PI * 2;
-  const focus = -(selectedIndex / count) * Math.PI * 2 + FOCUS_ANGLE;
-  const a = base + focus + ambient;
+  const a = base + focusAngle + ambient;
+  return target.set(
+    Math.cos(a) * orbitRadius,
+    0,
+    Math.sin(a) * orbitRadius
+  );
+}
+
+/** The `focusAngle` that brings `bodyIndex` to the focus slot. */
+export function focusAngleFor(bodyIndex: number, count: number): number {
+  return FOCUS_ANGLE - (bodyIndex / count) * Math.PI * 2;
+}
+
+/**
+ * World position of the (fixed) focus slot the camera looks at. The selected
+ * planet rotates *into* this slot, which is what makes the rotation visible.
+ */
+export function frontSlotPosition(
+  target: THREE.Vector3,
+  orbitRadius: number,
+  ambient: number
+): THREE.Vector3 {
+  const a = FOCUS_ANGLE + ambient;
   return target.set(
     Math.cos(a) * orbitRadius,
     0,

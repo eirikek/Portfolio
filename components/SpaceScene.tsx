@@ -27,7 +27,7 @@ function SceneContents() {
   const quality = useQuality();
   const layerIndex = usePortfolioStore((s) => s.layerIndex);
   const bodyIndex = usePortfolioStore((s) => s.bodyIndex);
-  const setBody = usePortfolioStore((s) => s.setBody);
+  const focusBody = usePortfolioStore((s) => s.focusBody);
   const setDetailOpen = usePortfolioStore((s) => s.setDetailOpen);
   const detailOpen = usePortfolioStore((s) => s.detailOpen);
 
@@ -44,7 +44,8 @@ function SceneContents() {
       // Clicking the already-focused planet toggles its detail panel.
       setDetailOpen(!detailOpen);
     } else {
-      setBody(i);
+      // Jump to that exact planet — even if it lives in another layer.
+      focusBody(layerIdx, i);
     }
   };
 
@@ -106,7 +107,7 @@ function SceneContents() {
 
 export function SpaceScene() {
   const quality = useQuality();
-  const rig = useRef<RigState>({ activeFloat: 0 });
+  const rig = useRef<RigState>({ activeFloat: 0, focusAngle: 0 });
 
   return (
     <Canvas

@@ -5,7 +5,8 @@ import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import type { PortfolioBody, BodyKind } from "@/lib/portfolioData";
-import { bodyLocalPosition } from "@/lib/orbits";
+import { bodyLocalPosition, focusAngleFor } from "@/lib/orbits";
+import { useRig } from "@/lib/rig";
 
 /** Fresnel atmosphere shell shader. */
 const atmoVertex = /* glsl */ `
@@ -33,6 +34,8 @@ interface PlanetProps {
   index: number;
   count: number;
   selectedIndex: number;
+  /** Whether this body's layer is the active one (drives the live ring spin). */
+  isActiveLayer: boolean;
   ambientSpeed: number;
   focused: boolean;
   onSelect: () => void;
@@ -45,6 +48,7 @@ export function Planet({
   index,
   count,
   selectedIndex,
+  isActiveLayer,
   ambientSpeed,
   focused,
   onSelect,
@@ -54,6 +58,7 @@ export function Planet({
   const scaleRef = useRef(1);
   const [hovered, setHovered] = useState(false);
   const tmp = useMemo(() => new THREE.Vector3(), []);
+  const rig = useRig();
 
   const atmoUniforms = useMemo(
     () => ({
@@ -85,7 +90,12 @@ export function Planet({
     if (!g) return;
     const t = state.clock.elapsedTime;
     const ambient = t * ambientSpeed * 0.08;
-    bodyLocalPosition(tmp, orbitRadius, index, count, selectedIndex, ambient);
+    // The active layer's ring uses the live damped rotation (so it spins into
+    // focus); inactive layers stay statically placed.
+    const focusAngle = isActiveLayer
+      ? rig.current.focusAngle
+      : focusAngleFor(selectedIndex, count);
+    bodyLocalPosition(tmp, orbitRadius, index, count, focusAngle, ambient);
     g.position.copy(tmp);
     // Gentle bob.
     g.position.y += Math.sin(t * 0.6 + index) * 0.25;
