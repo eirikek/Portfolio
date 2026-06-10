@@ -38,6 +38,43 @@ button {
   color: inherit;
 }
 
+.semantic-portfolio {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.semantic-portfolio:focus-within {
+  width: min(680px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+  clip-path: none;
+  white-space: normal;
+  padding: 24px;
+  background: #090d19;
+}
+.semantic-portfolio nav,
+.semantic-portfolio section {
+  margin-bottom: 24px;
+}
+.semantic-portfolio nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.semantic-portfolio article {
+  margin-bottom: 18px;
+}
+.semantic-portfolio a {
+  color: #6cc6ff;
+  text-decoration: underline;
+}
+
 h1,
 h2,
 h3,

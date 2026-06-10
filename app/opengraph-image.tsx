@@ -1,11 +1,35 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Eirik Kvam software developer portfolio";
+export const alt = "Eirik Engen Kvam software developer portfolio";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+// Vendored TTFs of the site's actual fonts (Orbitron for headings, Space
+// Grotesk for body) so the card matches the live site instead of falling back
+// to the platform's generic sans-serif.
+const orbitronMedium = fetch(
+  new URL("./fonts/Orbitron-Medium.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
+const orbitronBold = fetch(
+  new URL("./fonts/Orbitron-Bold.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
+const spaceGroteskRegular = fetch(
+  new URL("./fonts/SpaceGrotesk-Regular.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
+const spaceGroteskMedium = fetch(
+  new URL("./fonts/SpaceGrotesk-Medium.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
+
+export default async function OpenGraphImage() {
+  const [orbitronMediumData, orbitronBoldData, spaceRegularData, spaceMediumData] =
+    await Promise.all([
+      orbitronMedium,
+      orbitronBold,
+      spaceGroteskRegular,
+      spaceGroteskMedium,
+    ]);
+
   return new ImageResponse(
     (
       <div
@@ -18,33 +42,93 @@ export default function OpenGraphImage() {
           padding: "88px",
           color: "#eaf0ff",
           background: "#03040c",
-          fontFamily: "sans-serif",
+          fontFamily: "Space Grotesk",
         }}
       >
-        <div style={{ color: "#6cc6ff", fontSize: 28, letterSpacing: 8 }}>
+        <div
+          style={{
+            color: "#6cc6ff",
+            fontFamily: "Orbitron",
+            fontWeight: 500,
+            fontSize: 28,
+            letterSpacing: 8,
+          }}
+        >
           SOFTWARE DEVELOPER
-        </div>
-        <div style={{ fontSize: 82, fontWeight: 700, marginTop: 24 }}>
-          Eirik Kvam
-        </div>
-        <div style={{ color: "#9fb0d6", fontSize: 34, marginTop: 22 }}>
-          Projects · Experience · Certifications · Skills
-        </div>
-        <div style={{ color: "#ffb454", fontSize: 28, marginTop: 76 }}>
-          Trondheim, Norway · eirikkvam.dev
         </div>
         <div
           style={{
-            position: "absolute",
-            right: 90,
-            top: 80,
-            fontSize: 90,
+            fontFamily: "Orbitron",
+            fontWeight: 700,
+            fontSize: 64,
+            marginTop: 24,
           }}
         >
-          🛰️
+          Eirik Engen Kvam
+        </div>
+        <div
+          style={{
+            color: "#9fb0d6",
+            fontSize: 34,
+            marginTop: 24,
+          }}
+        >
+          Projects · Experience · Certifications · Skills
+        </div>
+        <div
+          style={{
+            color: "#ffb454",
+            fontWeight: 500,
+            fontSize: 28,
+            marginTop: 72,
+          }}
+        >
+          Trondheim, Norway · eirikkvam.no
+        </div>
+
+        {/* Drawn planet — satori renders emoji as tofu without extra config. */}
+        <div
+          style={{
+            position: "absolute",
+            top: 86,
+            right: 96,
+            width: 200,
+            height: 200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              width: 250,
+              height: 86,
+              border: "6px solid rgba(255, 180, 84, 0.55)",
+              borderRadius: 999,
+              transform: "rotate(-24deg)",
+            }}
+          />
+          <div
+            style={{
+              width: 160,
+              height: 160,
+              borderRadius: 999,
+              background: "linear-gradient(135deg, #8ad2ff 0%, #4f8fd6 45%, #1f3a66 100%)",
+              boxShadow: "0 0 60px rgba(108, 198, 255, 0.45)",
+            }}
+          />
         </div>
       </div>
     ),
-    size
+    {
+      ...size,
+      fonts: [
+        { name: "Orbitron", data: orbitronMediumData, weight: 500, style: "normal" },
+        { name: "Orbitron", data: orbitronBoldData, weight: 700, style: "normal" },
+        { name: "Space Grotesk", data: spaceRegularData, weight: 400, style: "normal" },
+        { name: "Space Grotesk", data: spaceMediumData, weight: 500, style: "normal" },
+      ],
+    }
   );
 }

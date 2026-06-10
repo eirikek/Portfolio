@@ -1,6 +1,8 @@
 import { Experience } from "@/components/Experience";
 import { contact, layers } from "@/lib/portfolioData";
 
+const siteUrl = "https://eirikkvam.no";
+
 export default function Home() {
   const projects = layers.find((layer) => layer.id === "projects")?.bodies ?? [];
   const structuredData = {
@@ -8,19 +10,20 @@ export default function Home() {
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://eirikkvam.dev/#website",
-        url: "https://eirikkvam.dev",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
         name: "Eirik Kvam | Portfolio",
         description:
-          "Portfolio of software developer Eirik Kvam, based in Trondheim, Norway.",
+          "Portfolio of software developer Eirik Engen Kvam, based in Trondheim, Norway.",
         inLanguage: "en",
-        author: { "@id": "https://eirikkvam.dev/#person" },
+        author: { "@id": `${siteUrl}/#person` },
       },
       {
         "@type": "Person",
-        "@id": "https://eirikkvam.dev/#person",
-        name: contact.name,
-        url: "https://eirikkvam.dev",
+        "@id": `${siteUrl}/#person`,
+        name: "Eirik Engen Kvam",
+        alternateName: contact.name,
+        url: siteUrl,
         email: `mailto:${contact.email}`,
         jobTitle: "Software Developer",
         description:
@@ -37,6 +40,7 @@ export default function Home() {
           url: "https://www.ntnu.edu/",
         },
         sameAs: [contact.linkedin, contact.github],
+        worksFor: { "@id": `${siteUrl}/#hoggorm-design` },
         knowsAbout: [
           "React",
           "Next.js",
@@ -49,20 +53,27 @@ export default function Home() {
         ],
       },
       {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#hoggorm-design`,
+        name: "Hoggorm Design",
+        founder: { "@id": `${siteUrl}/#person` },
+        member: { "@id": `${siteUrl}/#person` },
+      },
+      {
         "@type": "ProfilePage",
-        "@id": "https://eirikkvam.dev/#portfolio",
-        url: "https://eirikkvam.dev",
+        "@id": `${siteUrl}/#portfolio`,
+        url: siteUrl,
         name: "Eirik Kvam | Portfolio",
-        isPartOf: { "@id": "https://eirikkvam.dev/#website" },
+        isPartOf: { "@id": `${siteUrl}/#website` },
         description:
-          "Projects, experience, certifications and technical skills of software developer Eirik Kvam.",
-        mainEntity: { "@id": "https://eirikkvam.dev/#person" },
+          "Projects, experience, certifications and technical skills of software developer Eirik Engen Kvam.",
+        mainEntity: { "@id": `${siteUrl}/#person` },
         hasPart: projects.map((project) => ({
           "@type": "CreativeWork",
           name: project.name,
           description: project.description,
           url: project.link?.url,
-          creator: { "@id": "https://eirikkvam.dev/#person" },
+          creator: { "@id": `${siteUrl}/#person` },
           keywords: project.tags?.join(", "),
         })),
       },
@@ -78,6 +89,37 @@ export default function Home() {
         }}
       />
       <Experience />
+      <aside className="semantic-portfolio" aria-label="Portfolio index">
+        <nav aria-label="Portfolio sections">
+          <a href="#projects">Projects</a>
+          <a href="#experience">Experience</a>
+          <a href="#certifications">Certifications</a>
+          <a href="#skills">Skills</a>
+          <a href="#contact">Contact</a>
+        </nav>
+
+        {layers.map((layer) => (
+          <section id={layer.id} key={layer.id}>
+            <h2>{layer.title}</h2>
+            {layer.bodies.map((body) => (
+              <article key={body.id}>
+                <h3>{body.name}</h3>
+                {body.meta && <p>{body.meta}</p>}
+                <p>{body.description}</p>
+                {body.link && <a href={body.link.url}>{body.link.label}</a>}
+              </article>
+            ))}
+          </section>
+        ))}
+
+        <section id="contact">
+          <h2>Contact Eirik Engen Kvam</h2>
+          <a href={`mailto:${contact.email}`}>Email</a>
+          <a href={contact.linkedin}>LinkedIn</a>
+          <a href={contact.github}>GitHub</a>
+          <a href={contact.cv}>CV</a>
+        </section>
+      </aside>
     </>
   );
 }

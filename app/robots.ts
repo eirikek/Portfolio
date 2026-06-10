@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://eirikkvam.dev/sitemap.xml",
-    host: "https://eirikkvam.dev",
+    sitemap: "https://eirikkvam.no/sitemap.xml",
+    host: "https://eirikkvam.no",
   };
 }

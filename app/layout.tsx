@@ -13,7 +13,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://eirikkvam.dev"),
+  metadataBase: new URL("https://eirikkvam.no"),
   title: {
     default: "Eirik Kvam | Portfolio",
     template: "%s | Eirik Kvam",
@@ -21,11 +21,12 @@ export const metadata: Metadata = {
   description:
     "Portfolio of Eirik Kvam, a software developer based in Trondheim, Norway. Experience with React, Next.js, TypeScript, Azure, Docker and modern web development. Explore projects, work experience, certifications and technical skills.",
   applicationName: "Eirik Kvam Portfolio",
-  authors: [{ name: "Eirik Kvam", url: "https://eirikkvam.dev" }],
-  creator: "Eirik Kvam",
-  publisher: "Eirik Kvam",
+  authors: [{ name: "Eirik Engen Kvam", url: "https://eirikkvam.no" }],
+  creator: "Eirik Engen Kvam",
+  publisher: "Eirik Engen Kvam",
   keywords: [
     "Eirik Kvam",
+    "Eirik Engen Kvam",
     "software developer Trondheim",
     "full-stack developer Norway",
     "React developer",
@@ -39,21 +40,24 @@ export const metadata: Metadata = {
   ],
   category: "technology",
   alternates: {
-    canonical: "/",
+    canonical: "https://eirikkvam.no",
+    languages: {
+      "en-US": "https://eirikkvam.no",
+    },
   },
   openGraph: {
     type: "profile",
-    url: "/",
+    url: "https://eirikkvam.no",
     title: "Eirik Kvam | Portfolio",
     description:
       "Software developer based in Trondheim, Norway. Explore projects, work experience, Microsoft certifications and technical skills.",
     siteName: "Eirik Kvam Portfolio",
     locale: "en_US",
     firstName: "Eirik",
-    lastName: "Kvam",
+    lastName: "Engen Kvam",
     images: [
       {
-        url: "/opengraph-image",
+        url: "https://eirikkvam.no/opengraph-image",
         width: 1200,
         height: 630,
         alt: "Eirik Kvam software developer portfolio",
@@ -65,7 +69,7 @@ export const metadata: Metadata = {
     title: "Eirik Kvam | Portfolio",
     description:
       "Software developer based in Trondheim, Norway. Explore projects, experience, certifications and technical skills.",
-    images: ["/opengraph-image"],
+    images: ["https://eirikkvam.no/opengraph-image"],
   },
   robots: {
     index: true,

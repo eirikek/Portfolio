@@ -2,12 +2,16 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Eirik Kvam | Portfolio",
+    id: "/",
+    name: "Eirik Engen Kvam | Portfolio",
     short_name: "Eirik Kvam",
     description:
-      "Portfolio of Eirik Kvam, a software developer based in Trondheim, Norway.",
+      "Portfolio of Eirik Engen Kvam, a software developer based in Trondheim, Norway.",
     start_url: "/",
+    scope: "/",
     display: "standalone",
+    lang: "en",
+    categories: ["portfolio", "technology", "developer"],
     background_color: "#03040c",
     theme_color: "#03040c",
     icons: [
