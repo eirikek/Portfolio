@@ -29,50 +29,57 @@ export function RocketContact() {
       fwd: new THREE.Vector3(),
       right: new THREE.Vector3(),
       up: new THREE.Vector3(),
-      center: new THREE.Vector3(),
+      pos: new THREE.Vector3(),
+      prev: new THREE.Vector3(),
       vel: new THREE.Vector3(),
       quat: new THREE.Quaternion(),
     }),
     []
   );
+  const ready = useRef(false);
 
-  useFrame((state) => {
+  useFrame((state, dt) => {
     const g = groupRef.current;
     if (!g) return;
     const t = state.clock.elapsedTime;
 
-    // Build a basis from the camera so the orbit stays framed on screen.
+    // Build a basis from the camera so the rocket stays framed on screen.
     camera.getWorldPosition(v.camPos);
     camera.getWorldDirection(v.fwd);
     v.right.crossVectors(v.fwd, WORLD_UP).normalize();
     v.up.crossVectors(v.right, v.fwd).normalize();
 
-    // Ellipse in front of the camera, biased upward so it clears the HUD.
-    const fwdDist = 36;
-    const rx = 17;
-    const ry = 9;
-    const upBias = 8;
-    const theta = t * 0.45;
-    const c = Math.cos(theta);
-    const s = Math.sin(theta);
+    // Wandering flight path: layered sines at incommensurate frequencies, so
+    // the rocket roams naturally and never traces an obvious circle. Biased
+    // upward + forward so it stays on screen and clears the planet and HUD.
+    const offRight =
+      14 * Math.sin(t * 0.27 + 0.0) + 6.5 * Math.sin(t * 0.61 + 1.3);
+    const offUp =
+      7 +
+      6 * Math.sin(t * 0.34 + 2.1) +
+      3.5 * Math.sin(t * 0.19 + 0.7);
+    const fwdDist = 35 + 5 * Math.sin(t * 0.12 + 0.4);
 
-    v.center
+    v.pos
       .copy(v.camPos)
       .addScaledVector(v.fwd, fwdDist)
-      .addScaledVector(v.up, upBias);
-    g.position
-      .copy(v.center)
-      .addScaledVector(v.right, c * rx)
-      .addScaledVector(v.up, s * ry);
+      .addScaledVector(v.right, offRight)
+      .addScaledVector(v.up, offUp);
 
-    // Orient the nose (+Y) along the travel tangent.
-    v.vel
-      .set(0, 0, 0)
-      .addScaledVector(v.right, -s * rx)
-      .addScaledVector(v.up, c * ry)
-      .normalize();
-    v.quat.setFromUnitVectors(MODEL_UP, v.vel);
-    g.quaternion.copy(v.quat);
+    if (!ready.current) {
+      v.prev.copy(v.pos);
+      ready.current = true;
+    }
+    g.position.copy(v.pos);
+
+    // Orient the nose (+Y) along actual travel, smoothed so turns bank gently.
+    v.vel.subVectors(v.pos, v.prev);
+    v.prev.copy(v.pos);
+    if (v.vel.lengthSq() > 1e-6) {
+      v.vel.normalize();
+      v.quat.setFromUnitVectors(MODEL_UP, v.vel);
+      g.quaternion.slerp(v.quat, 1 - Math.exp(-6 * dt));
+    }
 
     // Flicker the flame.
     if (flameRef.current) {
