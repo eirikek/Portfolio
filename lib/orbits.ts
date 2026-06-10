@@ -1,0 +1,59 @@
+import * as THREE from "three";
+
+/** Vertical distance between stacked orbital planes (layers). */
+export const LAYER_GAP = 14;
+
+/** Where the focused body sits, in radians, around its ring (front-right). */
+export const FOCUS_ANGLE = 0;
+
+/**
+ * Local position of a body on its orbit ring.
+ *
+ * The selected body is rotated to FOCUS_ANGLE (front-right of the scene); the
+ * others spread evenly around the ring. A tiny ambient term keeps everything
+ * gently drifting so the system feels alive without ever losing focus — the
+ * camera uses this exact same function, so it stays locked on regardless.
+ */
+export function bodyLocalPosition(
+  target: THREE.Vector3,
+  orbitRadius: number,
+  index: number,
+  count: number,
+  selectedIndex: number,
+  ambient: number
+): THREE.Vector3 {
+  const base = (index / count) * Math.PI * 2;
+  const focus = -(selectedIndex / count) * Math.PI * 2 + FOCUS_ANGLE;
+  const a = base + focus + ambient;
+  return target.set(
+    Math.cos(a) * orbitRadius,
+    0,
+    Math.sin(a) * orbitRadius
+  );
+}
+
+/** Vertical offset of a layer's plane given the (fractional) active layer. */
+export function layerY(layerIndex: number, activeFloat: number): number {
+  return (layerIndex - activeFloat) * LAYER_GAP;
+}
+
+/** Smooth, frame-rate-independent damping toward a target value. */
+export function damp(
+  current: number,
+  target: number,
+  lambda: number,
+  dt: number
+): number {
+  return THREE.MathUtils.damp(current, target, lambda, dt);
+}
+
+export function dampV3(
+  current: THREE.Vector3,
+  target: THREE.Vector3,
+  lambda: number,
+  dt: number
+): void {
+  current.x = THREE.MathUtils.damp(current.x, target.x, lambda, dt);
+  current.y = THREE.MathUtils.damp(current.y, target.y, lambda, dt);
+  current.z = THREE.MathUtils.damp(current.z, target.z, lambda, dt);
+}
