@@ -51,37 +51,35 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   nextLayer: () =>
     set((s) => {
       const layerIndex = (s.layerIndex + 1) % layers.length;
-      return { layerIndex, bodyIndex: 0, detailOpen: false };
+      return { layerIndex, bodyIndex: 0 };
     }),
   prevLayer: () =>
     set((s) => {
       const layerIndex = (s.layerIndex - 1 + layers.length) % layers.length;
-      return { layerIndex, bodyIndex: 0, detailOpen: false };
+      return { layerIndex, bodyIndex: 0 };
     }),
   setLayer: (index) =>
     set(() => ({
       layerIndex: ((index % layers.length) + layers.length) % layers.length,
       bodyIndex: 0,
-      detailOpen: false,
     })),
 
   nextBody: () =>
     set((s) => {
       const count = layers[s.layerIndex].bodies.length;
-      return { bodyIndex: (s.bodyIndex + 1) % count, detailOpen: false };
+      return { bodyIndex: (s.bodyIndex + 1) % count };
     }),
   prevBody: () =>
     set((s) => {
       const count = layers[s.layerIndex].bodies.length;
       return {
         bodyIndex: (s.bodyIndex - 1 + count) % count,
-        detailOpen: false,
       };
     }),
   setBody: (index) =>
     set((s) => {
       const count = layers[s.layerIndex].bodies.length;
-      return { bodyIndex: ((index % count) + count) % count, detailOpen: false };
+      return { bodyIndex: ((index % count) + count) % count };
     }),
   focusBody: (layerIndex, bodyIndex) =>
     set(() => {
@@ -89,7 +87,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
         ((layerIndex % layers.length) + layers.length) % layers.length;
       const count = layers[li].bodies.length;
       const bi = ((bodyIndex % count) + count) % count;
-      return { layerIndex: li, bodyIndex: bi, detailOpen: false };
+      return { layerIndex: li, bodyIndex: bi };
     }),
 
   setRocketOpen: (open) => set(() => ({ rocketOpen: open })),
