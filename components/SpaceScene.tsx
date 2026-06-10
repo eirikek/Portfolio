@@ -27,6 +27,7 @@ function SceneContents() {
   const quality = useQuality();
   const layerIndex = usePortfolioStore((s) => s.layerIndex);
   const bodyIndex = usePortfolioStore((s) => s.bodyIndex);
+  const bodyByLayer = usePortfolioStore((s) => s.bodyByLayer);
   const focusBody = usePortfolioStore((s) => s.focusBody);
   const setDetailOpen = usePortfolioStore((s) => s.setDetailOpen);
   const detailOpen = usePortfolioStore((s) => s.detailOpen);
@@ -64,7 +65,7 @@ function SceneContents() {
           layer={layer}
           layerIndex={i}
           isActive={i === layerIndex}
-          selectedIndex={i === layerIndex ? bodyIndex : 0}
+          selectedIndex={i === layerIndex ? bodyIndex : bodyByLayer[i] ?? 0}
           onSelectBody={(bi) => handleSelect(i, bi)}
         />
       ))}
@@ -103,7 +104,10 @@ function SceneContents() {
 
 export function SpaceScene() {
   const quality = useQuality();
-  const rig = useRef<RigState>({ activeFloat: 0, focusAngle: 0 });
+  const rig = useRef<RigState>({
+    activeFloat: 0,
+    ringAngles: layers.map(() => 0),
+  });
 
   return (
     <Canvas

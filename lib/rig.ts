@@ -8,8 +8,13 @@ import { createContext, useContext } from "react";
 export interface RigState {
   /** Fractional active layer index (lerped toward the store's layerIndex). */
   activeFloat: number;
-  /** Damped rotation of the active layer's ring (drives the orbit spin). */
-  focusAngle: number;
+  /**
+   * Damped rotation of each layer's ring (one entry per layer). Each ring keeps
+   * its own angle so every row remembers where it was rotated to; the active
+   * ring only spins toward its focused planet once the camera has descended to
+   * that row (see RigController), giving a "move to the row, then rotate" feel.
+   */
+  ringAngles: number[];
 }
 
 export const RigContext = createContext<{ current: RigState } | null>(null);

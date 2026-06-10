@@ -23,8 +23,7 @@ const TWO_PI = Math.PI * 2;
 export function RigController() {
   const rig = useRig();
   const layerIndex = usePortfolioStore((s) => s.layerIndex);
-  const bodyIndex = usePortfolioStore((s) => s.bodyIndex);
-  const prevLayer = useRef(layerIndex);
+  const bodyByLayer = usePortfolioStore((s) => s.bodyByLayer);
 
   useFrame((_, dt) => {
     rig.current.activeFloat = THREE.MathUtils.damp(
@@ -34,23 +33,22 @@ export function RigController() {
       dt
     );
 
-    const count = layers[layerIndex].bodies.length;
-    let target = focusAngleFor(bodyIndex, count);
-    // Unwrap to the nearest equivalent angle so the ring rotates the short way.
-    while (target - rig.current.focusAngle > Math.PI) target -= TWO_PI;
-    while (target - rig.current.focusAngle < -Math.PI) target += TWO_PI;
+    for (let i = 0; i < layers.length; i++) {
+      const count = layers[i].bodies.length;
+      const current = rig.current.ringAngles[i] ?? 0;
+      let target = focusAngleFor(bodyByLayer[i] ?? 0, count);
+      // Unwrap to the nearest equivalent angle so the ring rotates the short way.
+      while (target - current > Math.PI) target -= TWO_PI;
+      while (target - current < -Math.PI) target += TWO_PI;
 
-    if (prevLayer.current !== layerIndex) {
-      // Don't spin the ring when merely switching layers — snap it.
-      rig.current.focusAngle = target;
-      prevLayer.current = layerIndex;
-    } else {
-      rig.current.focusAngle = THREE.MathUtils.damp(
-        rig.current.focusAngle,
-        target,
-        5,
-        dt
-      );
+      // Only the active row rotates, and only once the camera has nearly
+      // descended to it. Every other ring stays frozen at the planet it last
+      // showed, so a row keeps its remembered planet and a cross-row jump reads
+      // as "move to the row, *then* spin to the clicked planet" — never a snap.
+      const arrived = Math.abs(rig.current.activeFloat - i) < 0.25;
+      if (i === layerIndex && arrived) {
+        rig.current.ringAngles[i] = THREE.MathUtils.damp(current, target, 5, dt);
+      }
     }
   });
   return null;

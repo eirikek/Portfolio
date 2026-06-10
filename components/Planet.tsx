@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import type { PortfolioBody, BodyKind } from "@/lib/portfolioData";
-import { bodyLocalPosition, focusAngleFor } from "@/lib/orbits";
+import { bodyLocalPosition } from "@/lib/orbits";
 import { useRig } from "@/lib/rig";
 
 const atmoVertex = /* glsl */ `
@@ -151,8 +151,7 @@ interface PlanetProps {
   orbitRadius: number;
   index: number;
   count: number;
-  selectedIndex: number;
-  isActiveLayer: boolean;
+  layerIndex: number;
   ambientSpeed: number;
   focused: boolean;
   onSelect: () => void;
@@ -164,8 +163,7 @@ export function Planet({
   orbitRadius,
   index,
   count,
-  selectedIndex,
-  isActiveLayer,
+  layerIndex,
   ambientSpeed,
   focused,
   onSelect,
@@ -240,9 +238,7 @@ export function Planet({
     if (!g) return;
     const t = state.clock.elapsedTime;
     const ambient = t * ambientSpeed * 0.08;
-    const focusAngle = isActiveLayer
-      ? rig.current.focusAngle
-      : focusAngleFor(selectedIndex, count);
+    const focusAngle = rig.current.ringAngles[layerIndex] ?? 0;
     bodyLocalPosition(tmp, orbitRadius, index, count, focusAngle, ambient);
     g.position.copy(tmp);
     g.position.y += Math.sin(t * 0.6 + index) * 0.25;
