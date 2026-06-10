@@ -85,40 +85,6 @@ export default async function OpenGraphImage() {
         >
           Trondheim, Norway · eirikkvam.no
         </div>
-
-        {/* Drawn planet — satori renders emoji as tofu without extra config. */}
-        <div
-          style={{
-            position: "absolute",
-            top: 86,
-            right: 96,
-            width: 200,
-            height: 200,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              width: 250,
-              height: 86,
-              border: "6px solid rgba(255, 180, 84, 0.55)",
-              borderRadius: 999,
-              transform: "rotate(-24deg)",
-            }}
-          />
-          <div
-            style={{
-              width: 160,
-              height: 160,
-              borderRadius: 999,
-              background: "linear-gradient(135deg, #8ad2ff 0%, #4f8fd6 45%, #1f3a66 100%)",
-              boxShadow: "0 0 60px rgba(108, 198, 255, 0.45)",
-            }}
-          />
-        </div>
       </div>
     ),
     {
