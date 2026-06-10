@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { FaEnvelope, FaFilePdf, FaGithub, FaLinkedin } from "react-icons/fa6";
 import { layers, contact } from "@/lib/portfolioData";
 import { usePortfolioStore } from "@/lib/store";
 import { useInputControls } from "@/hooks/useInputControls";
@@ -179,16 +180,15 @@ export function ResponsiveHUD() {
                   >
                     Close
                   </button>
-                  <p className="contact-panel__eyebrow">Transmission received</p>
                   <h3 className="contact-panel__title">Let&apos;s connect</h3>
-                  <p className="contact-panel__sub">{contact.tagline}</p>
 
                   <div className="contact-links">
                     <a className="contact-link" href={`mailto:${contact.email}`}>
-                      <span className="contact-link__icon">MAIL</span>
+                      <span className="contact-link__icon" aria-hidden>
+                        <FaEnvelope />
+                      </span>
                       <span>
                         <strong>Email</strong>
-                        <small>{contact.email}</small>
                       </span>
                     </a>
                     <a
@@ -197,10 +197,11 @@ export function ResponsiveHUD() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <span className="contact-link__icon">IN</span>
+                      <span className="contact-link__icon" aria-hidden>
+                        <FaLinkedin />
+                      </span>
                       <span>
                         <strong>LinkedIn</strong>
-                        <small>Professional profile</small>
                       </span>
                     </a>
                     <a
@@ -209,10 +210,11 @@ export function ResponsiveHUD() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <span className="contact-link__icon">GIT</span>
+                      <span className="contact-link__icon" aria-hidden>
+                        <FaGithub />
+                      </span>
                       <span>
                         <strong>GitHub</strong>
-                        <small>Code & projects</small>
                       </span>
                     </a>
                     <a
@@ -221,20 +223,14 @@ export function ResponsiveHUD() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <span className="contact-link__icon">PDF</span>
+                      <span className="contact-link__icon" aria-hidden>
+                        <FaFilePdf />
+                      </span>
                       <span>
                         <strong>Download CV</strong>
-                        <small>PDF résumé</small>
                       </span>
                     </a>
                   </div>
-
-                  <a
-                    className="cta cta--full"
-                    href={`mailto:${contact.email}`}
-                  >
-                    Get in touch
-                  </a>
                 </motion.div>
               </motion.div>
             )}

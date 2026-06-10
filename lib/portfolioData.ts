@@ -56,8 +56,8 @@ export interface ContactInfo {
 export const contact: ContactInfo = {
   name: "Eirik Kvam",
   tagline: "Full-stack developer · Web and digital solutions",
-  email: "hello@eirikkvam.dev",
-  linkedin: "https://www.linkedin.com/in/eirikek",
+  email: "eirik.engen.kvam@hoggormdesign.no",
+  linkedin: "https://www.linkedin.com/in/eirik-engen-kvam/",
   github: "https://github.com/eirikek",
   cv: "/cv.pdf",
 };
