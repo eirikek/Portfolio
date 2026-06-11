@@ -70,8 +70,8 @@ export function useInputControls() {
       const dy = e.changedTouches[0].clientY - startY;
       if (Math.abs(dx) < THRESHOLD && Math.abs(dy) < THRESHOLD) return;
       if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx < 0) s.nextBody();
-        else s.prevBody();
+        if (dx < 0) s.prevBody();
+        else s.nextBody();
       } else {
         if (dy < 0) s.nextLayer();
         else s.prevLayer();

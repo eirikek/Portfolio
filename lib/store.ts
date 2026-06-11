@@ -62,36 +62,60 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     set((s) => {
       const layerIndex = (s.layerIndex + 1) % layers.length;
       // Restore the planet this layer was last focused on.
-      return { layerIndex, bodyIndex: s.bodyByLayer[layerIndex] ?? 0 };
+      return {
+        layerIndex,
+        bodyIndex: s.bodyByLayer[layerIndex] ?? 0,
+        detailOpen: false,
+      };
     }),
   prevLayer: () =>
     set((s) => {
       const layerIndex = (s.layerIndex - 1 + layers.length) % layers.length;
-      return { layerIndex, bodyIndex: s.bodyByLayer[layerIndex] ?? 0 };
+      return {
+        layerIndex,
+        bodyIndex: s.bodyByLayer[layerIndex] ?? 0,
+        detailOpen: false,
+      };
     }),
   setLayer: (index) =>
     set((s) => {
       const layerIndex = ((index % layers.length) + layers.length) % layers.length;
-      return { layerIndex, bodyIndex: s.bodyByLayer[layerIndex] ?? 0 };
+      return {
+        layerIndex,
+        bodyIndex: s.bodyByLayer[layerIndex] ?? 0,
+        detailOpen: false,
+      };
     }),
 
   nextBody: () =>
     set((s) => {
       const count = layers[s.layerIndex].bodies.length;
       const bodyIndex = (s.bodyIndex + 1) % count;
-      return { bodyIndex, bodyByLayer: withBody(s.bodyByLayer, s.layerIndex, bodyIndex) };
+      return {
+        bodyIndex,
+        bodyByLayer: withBody(s.bodyByLayer, s.layerIndex, bodyIndex),
+        detailOpen: false,
+      };
     }),
   prevBody: () =>
     set((s) => {
       const count = layers[s.layerIndex].bodies.length;
       const bodyIndex = (s.bodyIndex - 1 + count) % count;
-      return { bodyIndex, bodyByLayer: withBody(s.bodyByLayer, s.layerIndex, bodyIndex) };
+      return {
+        bodyIndex,
+        bodyByLayer: withBody(s.bodyByLayer, s.layerIndex, bodyIndex),
+        detailOpen: false,
+      };
     }),
   setBody: (index) =>
     set((s) => {
       const count = layers[s.layerIndex].bodies.length;
       const bodyIndex = ((index % count) + count) % count;
-      return { bodyIndex, bodyByLayer: withBody(s.bodyByLayer, s.layerIndex, bodyIndex) };
+      return {
+        bodyIndex,
+        bodyByLayer: withBody(s.bodyByLayer, s.layerIndex, bodyIndex),
+        detailOpen: false,
+      };
     }),
   focusBody: (layerIndex, bodyIndex) =>
     set((s) => {
@@ -99,7 +123,12 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
         ((layerIndex % layers.length) + layers.length) % layers.length;
       const count = layers[li].bodies.length;
       const bi = ((bodyIndex % count) + count) % count;
-      return { layerIndex: li, bodyIndex: bi, bodyByLayer: withBody(s.bodyByLayer, li, bi) };
+      return {
+        layerIndex: li,
+        bodyIndex: bi,
+        bodyByLayer: withBody(s.bodyByLayer, li, bi),
+        detailOpen: false,
+      };
     }),
 
   setRocketOpen: (open) => set(() => ({ rocketOpen: open })),

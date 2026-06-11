@@ -133,7 +133,7 @@ export function ResponsiveHUD() {
                   <p className="detail-panel__meta">{body.meta}</p>
                 )}
                 <p className="detail-panel__desc">{body.description}</p>
-                {body.tags && (
+                {layer.id === "skills" && body.tags && (
                   <div className="tag-row">
                     {body.tags.map((t) => (
                       <span key={t} className="tag">
