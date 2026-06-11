@@ -242,7 +242,7 @@ export function ResponsiveHUD() {
                         <FaFilePdf />
                       </span>
                       <span>
-                        <strong>Download CV</strong>
+                        <strong>CV</strong>
                       </span>
                     </a>
                   </div>
