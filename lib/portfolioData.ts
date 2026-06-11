@@ -72,6 +72,17 @@ export const layers: OrbitLayer[] = [
     accent: "#6cc6ff",
     bodies: [
       {
+        id: "eirik-kvam-portfolio",
+        name: "Personal Portfolio",
+        description:
+          "Designed and developed an interactive 3D portfolio that presents projects, work experience, certifications and technical skills through an explorable solar system. Built the experience with responsive navigation, animated orbital scenes and dedicated content views for desktop and mobile.",
+        tags: ["Next.js", "React", "TypeScript", "React Three Fiber", "Three.js", "WebGL"],
+        link: { label: "This website", url: "#" },
+        color: "#458fd1",
+        atmosphere: "#9edcff",
+        radius: 2.2,
+      },
+      {
         id: "nasa-hunch-norway",
         name: "NASA HUNCH Norway",
         description:
