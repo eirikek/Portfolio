@@ -1,10 +1,10 @@
 import { Experience } from "@/components/Experience";
 import { contact, layers } from "@/lib/portfolioData";
-
-const siteUrl = "https://eirikkvam.no";
+import { absoluteUrl, defaultDescription, defaultTitle, siteUrl } from "@/lib/seo";
 
 export default function Home() {
   const projects = layers.find((layer) => layer.id === "projects")?.bodies ?? [];
+  const projectUrl = (url?: string) => (url === "#" || !url ? siteUrl : url);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -12,22 +12,23 @@ export default function Home() {
         "@type": "WebSite",
         "@id": `${siteUrl}/#website`,
         url: siteUrl,
-        name: "Eirik Kvam | Portfolio",
-        description:
-          "Portfolio of software developer Eirik Engen Kvam, based in Trondheim, Norway.",
+        name: defaultTitle,
+        alternateName: ["Eirik Kvam Portfolio", "eirikkvam.no"],
+        description: defaultDescription,
         inLanguage: "en",
         author: { "@id": `${siteUrl}/#person` },
+        publisher: { "@id": `${siteUrl}/#person` },
       },
       {
         "@type": "Person",
         "@id": `${siteUrl}/#person`,
         name: "Eirik Engen Kvam",
-        alternateName: contact.name,
+        alternateName: ["Eirik Kvam", contact.name],
         url: siteUrl,
         email: `mailto:${contact.email}`,
-        jobTitle: "Software Developer",
+        jobTitle: ["Software Developer", "Full-Stack Developer"],
         description:
-          "Software developer based in Trondheim, Norway, working with modern web development, cloud platforms and digital solutions.",
+          "Eirik Engen Kvam is a software developer based in Trondheim, Norway, working with modern web development, cloud platforms and digital solutions.",
         address: {
           "@type": "PostalAddress",
           addressLocality: "Trondheim",
@@ -41,6 +42,7 @@ export default function Home() {
         },
         sameAs: [contact.linkedin, contact.github],
         worksFor: { "@id": `${siteUrl}/#hoggorm-design` },
+        knowsLanguage: ["English", "Norwegian"],
         knowsAbout: [
           "React",
           "Next.js",
@@ -51,6 +53,17 @@ export default function Home() {
           "Sanity CMS",
           "Web Development",
         ],
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${siteUrl}/#webpage`,
+        url: siteUrl,
+        name: defaultTitle,
+        description: defaultDescription,
+        isPartOf: { "@id": `${siteUrl}/#website` },
+        about: { "@id": `${siteUrl}/#person` },
+        mainEntity: { "@id": `${siteUrl}/#person` },
+        inLanguage: "en",
       },
       {
         "@type": "Organization",
@@ -68,14 +81,27 @@ export default function Home() {
         description:
           "Projects, experience, certifications and technical skills of software developer Eirik Engen Kvam.",
         mainEntity: { "@id": `${siteUrl}/#person` },
+        breadcrumb: { "@id": `${siteUrl}/#breadcrumb` },
         hasPart: projects.map((project) => ({
           "@type": "CreativeWork",
           name: project.name,
           description: project.description,
-          url: project.link?.url,
+          url: projectUrl(project.link?.url),
           creator: { "@id": `${siteUrl}/#person` },
           keywords: project.tags?.join(", "),
         })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${siteUrl}/#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Eirik Engen Kvam",
+            item: siteUrl,
+          },
+        ],
       },
     ],
   };
@@ -90,12 +116,20 @@ export default function Home() {
       />
       <Experience />
       <aside className="semantic-portfolio" aria-label="Portfolio index">
+        <header>
+          <h1>Eirik Engen Kvam - Software Developer in Trondheim, Norway</h1>
+          <p>
+            Eirik Kvam builds websites and digital products with React, Next.js,
+            TypeScript, Azure, Docker and Sanity CMS.
+          </p>
+        </header>
+
         <nav aria-label="Portfolio sections">
-          <a href="#projects">Projects</a>
-          <a href="#experience">Experience</a>
-          <a href="#certifications">Certifications</a>
-          <a href="#skills">Skills</a>
-          <a href="#contact">Contact</a>
+          <a href={absoluteUrl("/projects")}>Projects by Eirik Kvam</a>
+          <a href={absoluteUrl("/experience")}>Experience</a>
+          <a href={absoluteUrl("/certifications")}>Certifications</a>
+          <a href={absoluteUrl("/skills")}>Skills</a>
+          <a href={absoluteUrl("/contact")}>Contact</a>
         </nav>
 
         {layers.map((layer) => (
@@ -106,7 +140,7 @@ export default function Home() {
                 <h3>{body.name}</h3>
                 {body.meta && <p>{body.meta}</p>}
                 <p>{body.description}</p>
-                {body.link && <a href={body.link.url}>{body.link.label}</a>}
+                {body.link && <a href={projectUrl(body.link.url)}>{body.link.label}</a>}
               </article>
             ))}
           </section>

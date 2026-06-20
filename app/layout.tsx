@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Orbitron, Space_Grotesk } from "next/font/google";
+import { BrowserFavicon } from "@/components/BrowserFavicon";
+import { defaultDescription, defaultTitle, siteName, siteUrl } from "@/lib/seo";
 import "./globals.css";
 
 const orbitron = Orbitron({
@@ -13,21 +15,22 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://eirikkvam.no"),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "Eirik Kvam | Portfolio",
+    default: defaultTitle,
     template: "%s | Eirik Kvam",
   },
-  description:
-    "Portfolio of Eirik Kvam, a software developer based in Trondheim, Norway. Experience with React, Next.js, TypeScript, Azure, Docker and modern web development. Explore projects, work experience, certifications and technical skills.",
-  applicationName: "Eirik Kvam Portfolio",
-  authors: [{ name: "Eirik Engen Kvam", url: "https://eirikkvam.no" }],
-  creator: "Eirik Engen Kvam",
-  publisher: "Eirik Engen Kvam",
+  description: defaultDescription,
+  applicationName: `${siteName} Portfolio`,
+  authors: [{ name: siteName, url: siteUrl }],
+  creator: siteName,
+  publisher: siteName,
   keywords: [
     "Eirik Kvam",
     "Eirik Engen Kvam",
+    "Eirik Engen Kvam portfolio",
     "software developer Trondheim",
+    "software developer Ålesund",
     "full-stack developer Norway",
     "React developer",
     "Next.js developer",
@@ -40,36 +43,34 @@ export const metadata: Metadata = {
   ],
   category: "technology",
   alternates: {
-    canonical: "https://eirikkvam.no",
+    canonical: siteUrl,
     languages: {
-      "en-US": "https://eirikkvam.no",
+      "en-US": siteUrl,
     },
   },
   openGraph: {
     type: "profile",
-    url: "https://eirikkvam.no",
-    title: "Eirik Kvam | Portfolio",
-    description:
-      "Software developer based in Trondheim, Norway. Explore projects, work experience, Microsoft certifications and technical skills.",
-    siteName: "Eirik Kvam Portfolio",
+    url: siteUrl,
+    title: defaultTitle,
+    description: defaultDescription,
+    siteName: `${siteName} Portfolio`,
     locale: "en_US",
     firstName: "Eirik",
     lastName: "Engen Kvam",
     images: [
       {
-        url: "https://eirikkvam.no/opengraph-image",
+        url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "Eirik Kvam software developer portfolio",
+        alt: "Eirik Engen Kvam software developer portfolio",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Eirik Kvam | Portfolio",
-    description:
-      "Software developer based in Trondheim, Norway. Explore projects, experience, certifications and technical skills.",
-    images: ["https://eirikkvam.no/opengraph-image"],
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [`${siteUrl}/opengraph-image`],
   },
   robots: {
     index: true,
@@ -83,9 +84,13 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
   },
   manifest: "/manifest.webmanifest",
 };
@@ -106,6 +111,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${orbitron.variable} ${spaceGrotesk.variable}`}>
+        <BrowserFavicon />
         {children}
       </body>
     </html>

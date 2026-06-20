@@ -1,3 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <text x="32" y="48" font-size="48" text-anchor="middle">🪐</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#03040c"/>
+  <circle cx="256" cy="256" r="150" fill="#151b3d"/>
+  <circle cx="256" cy="256" r="108" fill="#f4c95d"/>
+  <path fill="#f0795a" d="M156 238c45-28 121-38 196-25 58 10 104 31 126 57-31 18-96 25-169 12-71-12-129-34-153-44Z"/>
+  <path fill="#ffffff" fill-opacity=".92" d="M83 180c26-47 113-75 210-68 109 8 192 55 184 104-6 37-63 62-141 67 48-7 82-24 86-48 6-35-57-69-141-75-85-6-160 18-184 56-9 14-10 29-4 42-20-24-24-51-10-78Z"/>
+  <path fill="#7bdff2" d="M109 349a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM388 145a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM406 365a12 12 0 1 0 0-24 12 12 0 0 0 0 24Z"/>
+  <path fill="#ffffff" fill-opacity=".84" d="M176 124h19v19h-19zM337 380h16v16h-16z"/>
 </svg>
